@@ -62,16 +62,18 @@ function Commenter(json_source) {
 	}
 	function loadComments() {
 		$.getJSON(json_source, function(json) {
-			oldJson = json;
-			$.each(json, function(v) {
-				// add the comment
-				addComment(
-					json[v]['name'],
-					json[v]['comment'],
-					json[v]['time'],
-					json[v]['position']
-				);
-			});
+			if(json != null) {
+				oldJson = json;
+				$.each(json, function(v) {
+					// add the comment
+					addComment(
+						json[v]['name'],
+						json[v]['comment'],
+						json[v]['time'],
+						json[v]['position']
+					);
+				});
+			}
 		});
 	}
 	function addComment(author, content, time, position) {
