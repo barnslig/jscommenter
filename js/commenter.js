@@ -1,9 +1,9 @@
 function Commenter(json_source) {
 	// create a new layer
 	var frame = $('body').append('<div id="comments_layer"></div>');
+	$('#comments_layer').append('<div id="comments_innerlayer"></div>');
 	$('#comments_layer').append('<canvas id="comments_static_canvas" class="comments_canvas" width="' + $(window).width() + '" height="' + $(window).height() + '"></canvas>');
 	$('#comments_layer').append('<canvas id="comments_dynamic_canvas" class="comments_canvas" width="' + $(window).width() + '" height="' + $(window).height() + '"></canvas>');
-	$('#comments_layer').append('<div id="comments_innerlayer"></div>');
 
 	// create something that resizes the canvas on window resize
 	/*
@@ -31,9 +31,11 @@ function Commenter(json_source) {
 	// create ALL the methodes!
 	this.hide = hide;
 	this.show = show;
+	this.toggle = toggle;
 	this.addComment = addComment;
 	this.addCloseLink = addCloseLink;
 	this.userAddComment = userAddComment;
+	this.loadComments = loadComments;
 	this.redrawLines = redrawLines;
 
 	function hide() {
