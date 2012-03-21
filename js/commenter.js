@@ -73,6 +73,8 @@ function Commenter(json_source) {
 						json[v]['position']
 					);
 				});
+			} else {
+				oldJson = [];
 			}
 		});
 	}
