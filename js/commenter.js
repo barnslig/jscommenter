@@ -37,22 +37,26 @@ function Commenter(json_source) {
 	this.redrawLines = redrawLines;
 
 	function hide() {
-		$("#comments_layer").fadeOut(500);
+		$('#comments_layer').fadeOut(500);
 	}
 	function show() {
-		$("#comments_layer").fadeIn(500);
+		$('#comments_layer').fadeIn(500);
+	}
+	function toggle() {
+		$('#comments_layer').fadeToggle(500);
 	}
 	function redrawLines() {
 		// clear the canvas
 		dynamic_ctx.clearRect(0, 0, dynamic_canvas.width, dynamic_canvas.height);
 		// redraw all lines
+		dynamic_ctx.beginPath();
 		$.each(dynamic_lines, function(v) {
 			// add the line
-			dynamic_ctx.beginPath();
+			
 			dynamic_ctx.moveTo(dynamic_lines[v][0], dynamic_lines[v][1]);
 			dynamic_ctx.lineTo(dynamic_lines[v][2], dynamic_lines[v][3]);
-			dynamic_ctx.stroke();
 		});
+		dynamic_ctx.stroke();
 	}
 	function loadComments() {
 		$.getJSON(json_source, function(json) {
@@ -67,7 +71,6 @@ function Commenter(json_source) {
 				);
 			});
 		});
-		console.log("loaded");
 	}
 	function addComment(author, content, time, position) {
 		// create the static canvas points
@@ -85,7 +88,7 @@ function Commenter(json_source) {
 		var r_time = date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
 
 		// create the comment
-		$("#comments_innerlayer").append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + r_time + '</div>')
+		$('#comments_innerlayer').append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + r_time + '</div>')
 		
 		// fade it in
 		$('#' + time).fadeIn(1000);
@@ -113,17 +116,17 @@ function Commenter(json_source) {
 		$('#comments_layer').append('<a id="comment_close" href="javascript:' + elem + '.hide();">X</a>')
 	}
 	function userAddComment(position) {
-		var user = prompt("Your Name:");
+		var user = prompt('Your Name:');
 		if(user != null) {
-			var comment = prompt("Your Comment:");
+			var comment = prompt('Your Comment:');
 			if(comment != null) {
 				// generate the new json
 				var time = Math.round((new Date()).getTime() / 1000);
 				var newJson = {
-					"name": user,
-					"comment": comment,
-					"position": position,
-					"time": time
+					'name': user,
+					'comment': comment,
+					'position': position,
+					'time': time
 				};
 				oldJson.push(newJson);
 
@@ -131,15 +134,15 @@ function Commenter(json_source) {
 				var lockToken;
 				data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:shared /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
 				$.ajax({
-					type:		"LOCK",
+					type:		'LOCK',
 					headers:	{'Timeout': 'Second-1000'},
 					url:		json_source,
 					async:		false,
 					data:		data,
-					dataType:	"xml",
+					dataType:	'xml',
 					success:	function(text) {
 						// get the lock token
-						lockToken = $(text).find("href").text();
+						lockToken = $(text).find('href').text();
 					}/*,
 					complete:	function(xhr, text) {
 						// check for a lock
@@ -148,35 +151,33 @@ function Commenter(json_source) {
 						}
 					}*/
 				});
-				console.log("locked");
+				console.log('locked');
 
 				// get the latest version
 				loadComments();
 
 				// push it to the server
 				$.ajax({
-					type:		"PUT",
-					headers:	{
-									'Lock-Token': "<" + lockToken + ">",
-									"If": '(<' + lockToken + '>)'
-								},
+					type:		'PUT',
+					headers:	{'If': '(<' + lockToken + '>)'},
 					url:		json_source,
 					async:		false,
 					data:		JSON.stringify(oldJson)
 				});
-				console.log("putted");
+				console.log('putted');
 
 				// unlock the file
 				$.ajax({
-					type:		"UNLOCK",
-					headers:	{'Lock-Token': "<" + lockToken + ">"},
+					type:		'UNLOCK',
+					headers:	{'Lock-Token': '<' + lockToken + '>'},
 					url:		json_source,
-					async:		false
+					async:		false,
+					complete:	function () {
+						// add the comment
+						addComment(user, comment, time, position);
+					}
 				});
-				console.log("unlocked.");
-
-				// add the comment
-				addComment(user, comment, time, position);
+				console.log('unlocked');
 			}
 		}
 	}
