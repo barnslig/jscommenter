@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Comments?</title>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
+
+		<link type="text/css" rel="stylesheet" href="css/commenter.css" />
+		<script type="text/javascript" src="js/commenter.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				// generate a new commenter
+				window.cmts = new Commenter('/foo.comments.json');
+				window.cmts.addCloseLink('window.cmts');
+
+				$('article *').mouseover(
+					function() {
+						$(this).addClass('hovered');
+					},
+					function() {
+						$(this).removeClass('hovered');
+					}
+				);
+			});
+		</script>
+	</head>
+	<body>
+		<header>
+			<h1>Hallo Welt!</h1>
+		</header>
+		<article>
+			<span id="elem"></span>
+			<a href="javascript:window.cmts.show();">Zeig her!</a>
+			<h2>Hier geht es weiter…</h2>
+			<p id="39">Lorem ipsum und so weiter…</p>
+			<p id="40">Lorem ipsum und so weiter…</p>
+			<p id="41">Lorem ipsum und so weiter…</p>
+			<p id="42">Lorem ipsum und so weiter…</p>
+		</article>
+	</body>
+</html>
