@@ -79,8 +79,13 @@ function Commenter(json_source) {
 		// create the dynamic line
 		dynamic_lines[time] = [position[0], position[1], (parseInt(position[0]) + 15), (parseInt(position[1]) + 15)];
 		redrawLines();
+
+		// make the time readable
+		var date = new Date(time * 1000);
+		var r_time = date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+
 		// create the comment
-		$("#comments_innerlayer").append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + time + '</div>')
+		$("#comments_innerlayer").append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + r_time + '</div>')
 		
 		// fade it in
 		$('#' + time).fadeIn(1000);
