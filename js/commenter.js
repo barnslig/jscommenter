@@ -9,6 +9,7 @@ function Commenter(json_source) {
 
 	// create the modal
 	$('#comments_layer').append('<div id="comments_modal" title="Create a new comment"><form><input placeholder="Name" type="text" id="comment_add_name" /><textarea placeholder="Comment" id="comment_add_comment"></textarea></form><h4>Choose a color:</h4><div id="comments_add_color_chooser"><div id="comment_add_color_red"></div><div id="comment_add_color_green"></div><div id="comment_add_color_blue"></div></div><div id="comment_add_color_field">foobar</div></div>');
+	
 	//// the color chooser
 	$('#comment_add_color_field').css('background', '#' + rgbToHex([125, 125, 125]));
 	$('#comment_add_color_red, #comment_add_color_green, #comment_add_color_blue').slider({
@@ -20,16 +21,16 @@ function Commenter(json_source) {
 			var r = $('#comment_add_color_red').slider('value');
 			var g = $('#comment_add_color_green').slider('value');
 			var b = $('#comment_add_color_blue').slider('value');
+
 			// check for dark colors to set the right font color
-			if((r + g + b) < 300) {
-				$('#comment_add_color_field').css('color', '#fff');
-			} else {
-				$('#comment_add_color_field').css('color', '#000');
-			}
+			var fontColor = textColorByRgb([r, g, b]);
+			$('#comment_add_color_field').css('color', fontColor);
+
 			// set the color-show-div-background
 			$('#comment_add_color_field').css('background', '#' + rgbToHex([r, g, b]));
 		}
 	});
+
 	//// the modal itself
 	$('#comments_modal').dialog({
 		autoOpen:	false,
@@ -92,6 +93,8 @@ function Commenter(json_source) {
 	this.loadComments = loadComments;
 	this.redrawLines = redrawLines;
 	this.rgbToHex = rgbToHex;
+	this.hexToRgb = hexToRgb;
+	this.textColorByRgb = textColorByRgb;
 
 	function hide() {
 		$('#comments_layer').fadeOut(500);
@@ -101,6 +104,13 @@ function Commenter(json_source) {
 	}
 	function toggle() {
 		$('#comments_layer').fadeToggle(500);
+	}
+	function textColorByRgb(rgb) {
+		if((rgb[0] + rgb[1] + rgb[2]) < 300) {
+			return "#ffffff";
+		} else {
+			return "#000000";
+		}
 	}
 	function rgbToHex(rgb) {
 		// stolen from http://jqueryui.com/demos/slider/#colorpicker
@@ -115,6 +125,18 @@ function Commenter(json_source) {
 			}
 		});
 		return hex.join('').toUpperCase();
+	}
+	function hexToRgb(hex) {
+		// from http://www.javascripter.net/faq/hextorgb.htm
+		function cutHex(h) {
+			return (h.charAt(0)=="#") ? h.substring(1,7):h
+		}
+		
+		r = parseInt((cutHex(hex)).substring(0,2),16);
+		g = parseInt((cutHex(hex)).substring(2,4),16);
+		b = parseInt((cutHex(hex)).substring(4,6),16);
+
+		return [r, g, b];
 	}
 	function redrawLines() {
 		// clear the canvas
@@ -163,8 +185,12 @@ function Commenter(json_source) {
 		var date = new Date(time * 1000);
 		var r_time = date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
 
+		// check for dark colors to set the right font color
+		rgb = hexToRgb(color);
+		var fontColor = textColorByRgb(rgb);
+
 		// create the comment
-		$('#comments_innerlayer').append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;background:' + color + ';" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + r_time + '</div>')
+		$('#comments_innerlayer').append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;color:' + fontColor + ';background:' + color + ';" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + r_time + '</div>')
 		
 		// fade it in
 		$('#' + time).fadeIn(1000);

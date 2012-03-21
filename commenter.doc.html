@@ -10,31 +10,60 @@
 			<ul>
 				<li>
 					<h2>Commenter(json_url)</h2>
-					<p>Erstellt eine neue Kommentarebene die sich über die gesamte Webseite legt und läd alle Kommentare aus der angegebenen URL.</p>
+					<p>Erstellt eine neue Kommentarebene die sich über die gesamte Webseite legt.</p>
+					<p>Es werden automatisch folgende Funktionen aufgerufen: <b><i>.show()</i></b>, <b><i>.loadComments()</i></b></p>
 					<ul>
 						<li>
-							<h3>hide()</h3>
+							<h3>.hide()</h3>
 							<p>Versteckt die Kommentare.</p>
 						</li>
 						<li>
-							<h3>show()</h3>
+							<h3>.show()</h3>
 							<p>Zeigt die Kommentare</p>
 						</li>
 						<li>
-							<h3>addComment(author, content, time, [pos_x, pos_y])</h3>
+							<h3>.toggle()</h3>
+							<p>Zeigt die Kommentare im Fall dass diese ausgeblendet waren, versteckt diese sollten sie eingeblendet sein.</p>
+						</li>
+						<li>
+							<h3>.addComment(<i>author, content, time, [pos_x, pos_y]</i>)</h3>
 							<p>Fügt der Kommentarebene ein Kommentar hinzu. Fügt <u>kein</u> Kommentar in die Kommentar-Datei ein.</p>
+							<p>Die Zeit wird als UNIX-Timestamp angegeben.</p>
+							<p>Die Position wird in Pixeln angegeben.</p>
 						</li>
 						<li>
-							<h3>addCloseLink(commenter_object)</h3>
-							<p>Fügt einen Link zum Schließen der Kommentarebene ein.
+							<h3>.addCloseLink(<i>commenter_object</i>)</h3>
+							<p>Fügt einen Link zum Schließen der Kommentarebene ein.</p>
+							<p>Das <i>commenter_object</i> ist der Name einer globale Variable die auf ein Commenter-Objekt zeigt in einem String.</p>
 						</li>
 						<li>
-							<h3>userAddComment([pos_x, pos_y])</h3>
-							<p>Fügt ein Kommentar der Datei auf dem Server hinzu.
+							<h3>.userAddComment(<i>user, comment, color, [pos_x, pos_y]</i>)</h3>
+							<p>Fügt der Datei auf dem Server sowie der Kommentarebene ein Kommentar hinzu.</p>
+							<p>Die Position wird in Pixeln angegeben.</p>
 						</li>
 						<li>
-							<h3>redrawLines()</h3>
-							<p>Zeichnet die Verbindungslinien zwischen den Kommentaren und den Kommentarpunkten neu</p>
+							<h3>.loadComments()</h3>
+							<p>Ruft alle Kommentare von dem beim Aufruf der Klasse übergebenen Pfad einer JSON-Datei ab und fügt diese Kommentare der Kommentarebene hinzu.</p>
+							<p><b>Achtung:</b> Diese Funktion wird beim Aufruf der Klasse mit ausgeführt und muss im Normalfall nicht aufgerufen zu werden.</p>
+						</li>
+						<li>
+							<h3>.redrawLines()</h3>
+							<p>Zeichnet die Verbindungslinien zwischen den Kommentaren und den Kommentarpunkten neu. Wird beim Verschieben eines Kommentars von alleine ausgeführt und muss im Normalfall nicht separat ausgeführt werden.</p>
+						</li>
+						<li>
+							<h3>.rgbToHex(<i>[r, g, b]</i>)</h3>
+							<p>Konvertiert einen RGB-Farbwert in einen HEX-Farbwert.</p>
+							<p><b>Rückgabewert:</b> String mit einem HEX-Farbwert <u>ohne</u> anführendes <i>#</i>.</p>
+						</li>
+						<li>
+							<h3>.hexToRgb(<i>hex</i>)</h3>
+							<p>Konvertiert einen HEX-Farbwert in einen RGB-Farbwert.</p>
+							<p><b>Rückgabewert:</b> Liste mit den RGB-Farbwerten: <i>[r, g, b]</i></p>
+						</li>
+						<li>
+							<h3>.textColorByRgb(<i>[r, g, b]</i>)</h3>
+							<p>Gibt bei einem hellen Farbwert <i>#ffffff</i> (weiß) zurück und bei einem dunklen Farbwert <i>#000000</i> (Schwarz) zurück.</p>
+						</li>
 					</ul>
 				</li>
 			</ul>
@@ -60,6 +89,7 @@
 				<li>Lösung für das Displaygrößenproblem finden</li>
 				<li>Möglichkeit zur Bearbeitung und Löschung von Kommentaren bauen</li>
 				<li>Integration in Vizard</li>
+				<li>Farbwechsel für Notizen ermöglichen</li>
 				<li>(Rechtemanagement)</li>
 			</ul>
 		</article>
