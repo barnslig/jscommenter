@@ -98,6 +98,14 @@ function Commenter(json_source) {
 				dynamic_lines[time] = [old[0], old[1], pos.left, pos.top];
 
 				redrawLines();
+			},
+			// ugly fix to draw the line always till the end
+			stop: function() {
+				old = dynamic_lines[time];
+				pos = $('#' + time).position();
+				dynamic_lines[time] = [old[0], old[1], pos.left, pos.top];
+
+				redrawLines();
 			}
 		});
 }
