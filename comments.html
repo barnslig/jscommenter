@@ -12,15 +12,6 @@
 				// generate a new commenter
 				window.cmts = new Commenter('/foo.comments.json');
 				window.cmts.addCloseLink('window.cmts');
-
-				$('article *').mouseover(
-					function() {
-						$(this).addClass('hovered');
-					},
-					function() {
-						$(this).removeClass('hovered');
-					}
-				);
 			});
 		</script>
 	</head>
