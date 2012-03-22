@@ -231,7 +231,7 @@ Commenter.prototype.userAddComment = function(author, comment, color, position){
 		dataType:	'xml',
 		success:	function(text) {
 			// get the lock token
-			lockToken = $(text).find('href').text();
+			lockToken = $(text).find('D\\:href').text();
 		}/*,
 		complete:	function(xhr, text) {
 			// check for a lock
