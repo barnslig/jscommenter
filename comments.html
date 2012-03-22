@@ -14,10 +14,18 @@
 				window.cmts.addCloseLink('window.cmts');
 			});
 		</script>
+		<style type="text/css">
+			#toggler {
+				position:		fixed;
+				top:			5px;
+				left:			10px;
+				z-index:		100;
+			}
+		</style>
 	</head>
 	<body>
 		<header>
-			<h1>Hallo Welt!</h1>
+			<h1>Hallo Welt!</h1><a id="toggler" href="javascript:window.cmts.toggle();">Toggle</a>
 		</header>
 		<article>
 			<span id="elem"></span>
