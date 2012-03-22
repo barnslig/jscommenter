@@ -10,8 +10,8 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				// generate a new commenter
-				window.cmts = new Commenter('/foo.comments.json');
-				window.cmts.addCloseLink('window.cmts');
+				window.cmts = new Commenter('#comments_layer', 'foo.comments.json');
+				window.cmts.show();
 			});
 		</script>
 		<style type="text/css">
@@ -24,12 +24,12 @@
 		</style>
 	</head>
 	<body>
+		<div id="comments_layer"></div>
 		<header>
 			<h1>Hallo Welt!</h1><a id="toggler" href="javascript:window.cmts.toggle();">Toggle</a>
 		</header>
 		<article>
 			<span id="elem"></span>
-			<a href="javascript:window.cmts.show();">Zeig her!</a>
 			<h2>Hier geht es weiter…</h2>
 			<p id="39">Lorem ipsum und so weiter…</p>
 			<p id="40">Lorem ipsum und so weiter…</p>

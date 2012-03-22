@@ -3,15 +3,25 @@
 	<head>
 		<title>jsCommenter Dokumentation</title>
 		<meta charset="utf-8" />
+		<style type="text/css">
+			body {
+				font-family:	sans-serif;
+			}
+			h3 i {
+				font-weight:	normal;
+			}
+		</style>
 	</head>
 	<body>
 		<article>
 			<h1>JavaScript Bibliothek</h1>
 			<ul>
 				<li>
-					<h2>Commenter(json_url)</h2>
+					<h2>Commenter(layer, json_url)</h2>
 					<p>Erstellt eine neue Kommentarebene die sich über die gesamte Webseite legt.</p>
-					<p>Es werden automatisch folgende Funktionen aufgerufen: <b><i>.show()</i></b>, <b><i>.loadComments()</i></b></p>
+					<p>Es werden automatisch folgende Funktionen aufgerufen: <b><i>.loadComments()</i></b></p>
+					<p><i>layer</i> ist ein <a href="http://api.jquery.com/category/selectors/">jQuery-kompatibler Selektorstring</a>.</p>
+					<p><i>json_url</i> ist ein String der eine URL zu der JSON-Datei enthält die die Kommentare beinhaltet.</p>
 					<ul>
 						<li>
 							<h3>.hide()</h3>
@@ -26,19 +36,23 @@
 							<p>Zeigt die Kommentare im Fall dass diese ausgeblendet waren, versteckt diese sollten sie eingeblendet sein.</p>
 						</li>
 						<li>
-							<h3>.addComment(<i>author, content, time, [pos_x, pos_y]</i>)</h3>
+							<h3>.createDialog()</h3>
+							<p>Generiert einen Dialog zur Erstellung eines Kommentars.</p>
+							<p><b>Rückgabewert:</b> Ein jQuery Dialog-Objekt.</p>
+						</li>
+						<li>
+							<h3>.addComment(<i>author, content, time, color, [pos_x, pos_y]</i>)</h3>
 							<p>Fügt der Kommentarebene ein Kommentar hinzu. Fügt <u>kein</u> Kommentar in die Kommentar-Datei ein.</p>
+							<p><i>author</i> und <i>content</i> werden als String angegeben.</p>
+							<p>Die Farbe wird als HEX-Farbwert angegeben.</p>
 							<p>Die Zeit wird als UNIX-Timestamp angegeben.</p>
 							<p>Die Position wird in Pixeln angegeben.</p>
 						</li>
 						<li>
-							<h3>.addCloseLink(<i>commenter_object</i>)</h3>
-							<p>Fügt einen Link zum Schließen der Kommentarebene ein.</p>
-							<p>Das <i>commenter_object</i> ist der Name einer globale Variable die auf ein Commenter-Objekt zeigt in einem String.</p>
-						</li>
-						<li>
-							<h3>.userAddComment(<i>user, comment, color, [pos_x, pos_y]</i>)</h3>
+							<h3>.userAddComment(<i>author, comment, color, [pos_x, pos_y]</i>)</h3>
 							<p>Fügt der Datei auf dem Server sowie der Kommentarebene ein Kommentar hinzu.</p>
+							<p><i>author</i> und <i>content</i> werden als String angegeben.</p>
+							<p>Die Farbe wird als HEX-Farbwert angegeben.</p>
 							<p>Die Position wird in Pixeln angegeben.</p>
 						</li>
 						<li>
@@ -74,12 +88,14 @@
 		"name":		"leonard",
 		"comment":	"Geht das?",
 		"position":	[30,60],
+		"color":	"#0092FF",
 		"time":		1332238700
 	},
 	{
 		"name":		"max muster",
 		"comment":	"scheinbar.",
 		"position":	[200, 400],
+		"color":	"#007D7D",
 		"time":		1332329016
 	}
 ]
@@ -89,7 +105,6 @@
 				<li>Lösung für das Displaygrößenproblem finden</li>
 				<li>Möglichkeit zur Bearbeitung und Löschung von Kommentaren bauen</li>
 				<li>Integration in Vizard</li>
-				<li>Farbwechsel für Notizen ermöglichen</li>
 				<li>(Rechtemanagement)</li>
 			</ul>
 		</article>
