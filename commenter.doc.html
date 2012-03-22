@@ -100,11 +100,36 @@
 	}
 ]
 			</pre>
+			<h1>Beispiel</h1>
+			<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+	&lt;head&gt;
+		&lt;title&gt;jsCommenter Test&lt;/title&gt;
+		&lt;meta charset="utf-8" /&gt;
+		&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"&gt;&lt;/script&gt;
+		&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"&gt;&lt;/script&gt;
+
+		&lt;link type="text/css" rel="stylesheet" href="css/commenter.css" /&gt;
+		&lt;script type="text/javascript" src="js/commenter.js"&gt;&lt;/script&gt;
+		&lt;script type="text/javascript"&gt;
+			$(document).ready(function() {
+				window.cmts = new Commenter('#comments_layer', 'foo.comments.json');
+				window.cmts.show();
+			});
+		&lt;/script&gt;
+	&lt;/head&gt;
+	&lt;body&gt;
+		&lt;div id="comments_layer"&gt;&lt;/div&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+			</pre>
+			<h1>Integration in Vizard</h1>
+			<p>Die Integration in Vizard erfordert keine weiteren Vorkehrungen neben den üblichen zur Nutzung von jsCommenter.</p>
 			<h1>To-Do:</h1>
 			<ul>
 				<li>Lösung für das Displaygrößenproblem finden</li>
 				<li>Möglichkeit zur Bearbeitung und Löschung von Kommentaren bauen</li>
-				<li>Integration in Vizard</li>
 				<li>(Rechtemanagement)</li>
 			</ul>
 		</article>
