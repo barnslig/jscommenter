@@ -231,7 +231,13 @@ Commenter.prototype.userAddComment = function(author, comment, color, position){
 		dataType:	'xml',
 		success:	function(text) {
 			// get the lock token
-			lockToken = $(text).find('D\\:href').text();
+			//// firefox hack
+			if($.browser.mozilla) {
+				lockToken = $(text).find('D\\:href').text();
+			} else {
+				lockToken = $(text).find('href').text();
+			}
+			
 		}/*,
 		complete:	function(xhr, text) {
 			// check for a lock
