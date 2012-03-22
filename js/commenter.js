@@ -16,14 +16,14 @@ var Commenter = function(layer, json_source) {
 	commenter.dynamic_lines = {};
 
 	// create the create-dialog
-	var dialog = commenter.createDialog();
+	commenter.dialog = commenter.createDialog();
 
 	// create the onClick-handler
 	commenter.layer.click(function(e) {
 		pos_x = e.pageX;
 		pos_y = e.pageY;
 
-		dialog.dialog('open');
+		commenter.dialog.dialog('open');
 	})
 
 	commenter.oldJson = [];
@@ -32,12 +32,18 @@ var Commenter = function(layer, json_source) {
 
 /* hide- and show-functions */
 Commenter.prototype.hide = function() {
+	commenter.dialog.dialog('close');
 	commenter.layer.fadeOut(500);
 }
 Commenter.prototype.show = function() {
 	commenter.layer.fadeIn(500);
 }
 Commenter.prototype.toggle = function() {
+	// the dialog
+	if(commenter.layer.is(':visible')) {
+		commenter.dialog.dialog('close');
+	}
+	// the layer
 	commenter.layer.fadeToggle(500);
 }
 
