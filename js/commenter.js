@@ -213,7 +213,7 @@ Commenter.prototype.showEditDialog = function(id) {
 	}
 }
 Commenter.prototype.createDialog = function() {
-	commenter.layer.append('<div id="comments_modal" title="Create a new comment"><form><input placeholder="Name" type="text" id="comment_add_name" /><textarea placeholder="Comment" id="comment_add_comment"></textarea></form><h4>Choose a color:</h4><div id="comments_add_color_chooser"><div id="comment_add_color_red"></div><div id="comment_add_color_green"></div><div id="comment_add_color_blue"></div></div><div id="comment_add_color_field">foobar</div></div>');
+	commenter.layer.append('<div id="comments_modal" title="Create a new comment"><form><input placeholder="Name" type="text" id="comment_add_name" /><textarea placeholder="Comment" id="comment_add_comment"></textarea></form><h4>Choose a color:</h4><div id="comments_add_color_chooser"><div id="comment_add_color_red"></div><div id="comment_add_color_green"></div><div id="comment_add_color_blue"></div></div><div id="comment_add_color_field"></div></div>');
 
 	// create the dialog
 	var dialog = $('#comments_modal').dialog({

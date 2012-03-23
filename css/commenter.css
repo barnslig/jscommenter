@@ -71,7 +71,7 @@
 	padding:		5px;
 	border-radius:	3px;
 	overflow:		hidden;
-	box-shadow:		10px black;
+	box-shadow:		0 0 5px black;
 }
 .ui-dialog-titlebar {
 	cursor:			move;
@@ -159,6 +159,7 @@ textarea, input {
 }
 input {
 	width:			294px;
+	margin-bottom:	5px;
 }
 textarea {
 	height:			50px;
