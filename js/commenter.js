@@ -1,6 +1,7 @@
 var Commenter = function(layer, json_source) {
 	commenter = this;
 	commenter.json_source = json_source;
+	commenter.editEnabled = false;
 
 	// create the commenter layer
 	commenter.layer = $(layer);
@@ -24,7 +25,7 @@ var Commenter = function(layer, json_source) {
 		pos_y = e.pageY;
 
 		commenter.dialog.dialog('open');
-	})
+	});
 
 	commenter.oldJson = [];
 	commenter.loadComments();
@@ -66,7 +67,7 @@ Commenter.prototype.redrawLines = function() {
 
 /* the comment add functions */
 Commenter.prototype.loadComments = function() {
-	$.getJSON(commenter.json_source, function(json) {
+	$.getJSON(commenter.json_source + '?' + Math.random().toString(36).substring(7), function(json) {
 		if(json != null) {
 			commenter.oldJson = json;
 			$.each(json, function(v) {
@@ -90,10 +91,11 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 		commenter.static_ctx.beginPath();
 		commenter.static_ctx.arc(position[0], position[1], 5, 0, Math.PI * 2, true);
 		commenter.static_ctx.fill();
+
+		// create the dynamic line
+		commenter.dynamic_lines[time] = [position[0], position[1], (parseInt(position[0]) + 15), (parseInt(position[1]) + 15)];
+		commenter.redrawLines();
 	}
-	// create the dynamic line
-	commenter.dynamic_lines[time] = [position[0], position[1], (parseInt(position[0]) + 15), (parseInt(position[1]) + 15)];
-	commenter.redrawLines();
 
 	// make the time readable
 	var date = new Date(time * 1000);
@@ -104,7 +106,32 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 	var fontColor = commenter.textColorByRgb(rgb);
 
 	// create the comment
-	$('#comments_innerlayer').append('<div style="left:' + (parseInt(position[0]) + 15) + 'px;top:' + (parseInt(position[1]) + 15) + 'px;color:' + fontColor + ';background:' + color + ';" class="comment" id="' + time + '">' + author + '<br>' + content + '<br>' + r_time + '</div>')
+	$('<div class="comment"></div>')
+		.css('left', (parseInt(position[0]) + 15) + 'px')
+		.css('top', (parseInt(position[1]) + 15) + 'px')
+		.css('color', fontColor)
+		.css('background', color)
+		.attr('id', time)
+		.append(
+			$('<header></header>')
+			.append(
+				$('<h4></h4>')
+				.append(author)
+			)
+			.append(
+				$('<small></small>')
+				.append(r_time)
+			)
+		)
+		.append(
+			$('<article></article>')
+			.append(content)
+		)
+		.appendTo('#comments_innerlayer')
+		.click(function() {
+			commenter.showEditDialog(time);
+			commenter.editEnabled = time;
+		});
 
 	// fade it in
 	$('#' + time).fadeIn(1000);
@@ -165,6 +192,26 @@ Commenter.prototype.textColorByRgb = function(rgb) {
 }
 
 /* the comment generator dialog */
+Commenter.prototype.getCommentByTime = function(time) {
+	// get the comment
+	var comment, id;
+	$.each(commenter.oldJson, function(v) {
+		if(commenter.oldJson[v]['time'] == time) {
+			comment = commenter.oldJson[v];
+			id = v;
+		}
+	});
+	return [id, comment];
+}
+Commenter.prototype.showEditDialog = function(id) {
+	comment = commenter.getCommentByTime(id);
+
+	if(comment != null) {
+		// insert things into the dialog
+		$('#comment_add_name').val(comment[1]['name']);
+		$('#comment_add_comment').val(comment[1]['comment']);
+	}
+}
 Commenter.prototype.createDialog = function() {
 	commenter.layer.append('<div id="comments_modal" title="Create a new comment"><form><input placeholder="Name" type="text" id="comment_add_name" /><textarea placeholder="Comment" id="comment_add_comment"></textarea></form><h4>Choose a color:</h4><div id="comments_add_color_chooser"><div id="comment_add_color_red"></div><div id="comment_add_color_green"></div><div id="comment_add_color_blue"></div></div><div id="comment_add_color_field">foobar</div></div>');
 
@@ -178,18 +225,36 @@ Commenter.prototype.createDialog = function() {
 				var g = $('#comment_add_color_green').slider('value');
 				var b = $('#comment_add_color_blue').slider('value');
 
-				// create the comment
-				commenter.userAddComment(
-					$('#comment_add_name').val(),
-					$('#comment_add_comment').val(),
-					'#' + commenter.rgbToHex([r, g, b]),
-					[pos_x, pos_y]
-				);
+				// check if editing is enabled
+				if(commenter.editEnabled != 0) {
+					comment = commenter.getCommentByTime(commenter.editEnabled);
+
+					// update the comment
+					commenter.userSetComment(
+						$('#comment_add_name').val(),
+						$('#comment_add_comment').val(),
+						'#' + commenter.rgbToHex([r, g, b]),
+						comment[1]['position'],
+						comment[1]['time']
+					);
+				} else {
+					// create the comment
+					commenter.userSetComment(
+						$('#comment_add_name').val(),
+						$('#comment_add_comment').val(),
+						'#' + commenter.rgbToHex([r, g, b]),
+						[pos_x, pos_y]
+					);
+				}
 
 				$(this).dialog('close');
+				$('#comment_add_name').val('');
+				$('#comment_add_comment').val('');
+				commenter.editEnabled = false;
 			},
 			'Cancel': function() {
 				$(this).dialog('close');
+				commenter.editEnabled = false;
 			}
 		}
 	});
@@ -218,7 +283,7 @@ Commenter.prototype.createDialog = function() {
 	return dialog;
 }
 
-Commenter.prototype.userAddComment = function(author, comment, color, position){
+Commenter.prototype.userSetComment = function(author, comment, color, position, time){
 	// lock the file
 	var lockToken;
 	data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:shared /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
@@ -249,10 +314,16 @@ Commenter.prototype.userAddComment = function(author, comment, color, position){
 	console.log('locked');
 
 	// reload the comments to prevent overwriting
+	$('#comments_innerlayer').empty();
 	commenter.loadComments();
 
 	// generate the new json
-	var time = Math.round((new Date()).getTime() / 1000);
+	if(commenter.editEnabled != 0) {
+		var commentObj = commenter.getCommentByTime(time);
+	} else {
+		var time = Math.round((new Date()).getTime() / 1000);
+	}
+	
 	var newJson = {
 		'name':		author,
 		'comment':	comment,
@@ -260,18 +331,26 @@ Commenter.prototype.userAddComment = function(author, comment, color, position){
 		'color':	color,
 		'time':		time
 	};
-	commenter.oldJson.push(newJson);
 
-	// get the latest version
-	commenter.loadComments();
+	if(commenter.editEnabled != 0) {
+		commenter.oldJson.splice(commentObj[0], 1, newJson);
+	} else {
+		commenter.oldJson.push(newJson);
+	}
 
 	// push it to the server
+	var everythingWentWell = false;
 	$.ajax({
 		type:		'PUT',
 		headers:	{'If': '(<' + lockToken + '>)'},
 		url:		commenter.json_source,
 		async:		false,
-		data:		JSON.stringify(commenter.oldJson)
+		data:		JSON.stringify(commenter.oldJson),
+		complete:	function(xhr) {
+			if(String(xhr.status).substr(0, 2) == "20") {
+				everythingWentWell = true;
+			}
+		}
 	});
 	console.log('putted');
 
@@ -281,14 +360,22 @@ Commenter.prototype.userAddComment = function(author, comment, color, position){
 		headers:	{'Lock-Token': '<' + lockToken + '>'},
 		url:		commenter.json_source,
 		async:		false,
-		complete:	function (xhr) {
+		complete:	function(xhr) {
 			// add the comment if everything went well
 			if(String(xhr.status).substr(0, 2) == "20") {
-				commenter.addComment(author, comment, time, color, position);
-			} else {
-				alert("Ooups, something went wrong!");
+				everythingWentWell = false;
 			}
 		}
 	});
+	// get the latest version
+	$('.comment').ajaxStop(function() {
+		if(everythingWentWell == true) {
+			$(this).remove();
+			commenter.loadComments();
+		} else {
+			alert("Ooups, something went wrong!");
+		}
+	});
+	
 	console.log('unlocked');
 }
