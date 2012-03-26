@@ -1,14 +1,12 @@
-#comments_layer {
-	position:		fixed;
+.comments-container {
+	position:		absolute;
 	z-index:		0;
 	left:			0;
 	top:			0;
-	right:			0;
-	bottom:			0;
 	background:		rgba(0, 0, 0, 0.2);
 	display:		none;
 }
-.comments_canvas {
+.comments-canvas {
 	position:		absolute;
 	z-index:		1;
 	left:			0;
@@ -17,7 +15,7 @@
 	bottom:			0;
 	display:		block;
 }
-#comments_innerlayer {
+.comments-innerLayer {
 	position:		absolute;
 	z-index:		2;
 	left:			0;
@@ -26,24 +24,18 @@
 	bottom:			0;
 	cursor:			crosshair;
 }
-#comment_close {
-	position:		absolute;
-	z-index:		3;
-	top:			3px;
-	left:			3px;
-}
 .comment {
 	position:		absolute;
-	display:		none;
 	background:		#ffc346;
 	width:			200px;
 	box-shadow:		0 0 3px black;
 	border-radius:	3px;
 	padding:		5px;
-	cursor:			move;
+	cursor:			pointer;
 }
 .comment header {
 	overflow:		hidden;
+	cursor:			move;
 }
 .comment header h4 {
 	margin:			0;
@@ -62,6 +54,7 @@
 	padding-top:	3px;
 	padding-left:	5px;
 	font-size:		15px;
+	width:			195px;
 }
 
 /* jQuery UI dialog on creating a new comment */
@@ -90,77 +83,49 @@
 	padding-top:	10px;
 }
 
-/* jQuery UI slider style from the base theme */
-.ui-slider .ui-slider-handle {
-	position:		absolute;
-	z-index:		2;
-	width:			100%;
-	height:			1.2em;
-	cursor:			default;
-	background:		black;
-}
-.ui-slider .ui-slider-range { 
-	position:		absolute;
-	z-index:		1;
-	display:		block;
-	border:			0;
-	background-position: 0 0; 
-}
-.ui-slider-vertical {
-	width:			13px;
-	height:			100px;
-}
-.ui-slider-vertical .ui-slider-range {
-	left:			0;
-	width:			100%;
-}
-.ui-slider-vertical .ui-slider-range-min {
-	bottom:			0;
-}
-.ui-slider-vertical .ui-slider-range-max {
-	top:			0;
-}
-
 /* the color-chooser */
-.ui-slider {
-	position:		relative;
-	border:			3px black solid;
-	float:			left;
-	margin-right:	15px;
+.comments-modal h4 {
 	margin-bottom:	10px;
 }
-#comment_add_color_field {
-	float:			right;
-	width:			100px;
-	height:			100px;
-	margin-right:	10px;
-}
-#comment_add_color_red .ui-slider-range {
-	background:		#ef2929;
-}
-#comment_add_color_green .ui-slider-range {
-	background:		#8ae234;
-}
-#comment_add_color_blue .ui-slider-range {
-	background:		#729fcf;
-}
-#comments_add_color_chooser {
+.comment-add-colorchooser {
+	display:		block;
 	overflow:		hidden;
 	float:			left;
-	margin-left:	10px;
 }
-textarea, input {
+.comment-add-colorchooser div {
+	width:			38px;
+	height:			20px;
+	margin:			6px;
+}
+.comment-add-colorchooser:last-child div {
+	margin-right:	0;
+}
+.comment-add-colorchooser input {
+	position:		absolute;
+	top:			-100px;
+}
+.comment-add-colorchooser input:checked + div {
+	border:			1px black solid;
+	box-shadow:		0 0 3px black;
+	margin:			5px;
+}
+
+textarea, input[type=text] {
 	display:		block;
 	width:			290px;
+	font-size:		12px;
 	font-family:	sans-serif;
 	margin-right:	10px;
 	border:			1px black solid;
 	resize:			none;
 }
-input {
+input[type=text] {
 	width:			294px;
 	margin-bottom:	5px;
 }
 textarea {
 	height:			50px;
+}
+button {
+	margin-right:	5px;
 }

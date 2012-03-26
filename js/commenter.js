@@ -1,4 +1,5 @@
-var Commenter = function(layer, json_source) {
+var Commenter = function (layer, json_source) {
+	var pos_x, pos_y;
 	commenter = this;
 	commenter.json_source = json_source;
 	commenter.editEnabled = false;
@@ -20,7 +21,7 @@ var Commenter = function(layer, json_source) {
 	commenter.dialog = commenter.createDialog();
 
 	// create the onClick-handler
-	commenter.layer.click(function(e) {
+	commenter.layer.click(function (e) {
 		pos_x = e.pageX;
 		pos_y = e.pageY;
 
@@ -32,14 +33,14 @@ var Commenter = function(layer, json_source) {
 };
 
 /* hide- and show-functions */
-Commenter.prototype.hide = function() {
+Commenter.prototype.hide = function () {
 	commenter.dialog.dialog('close');
 	commenter.layer.fadeOut(500);
 }
-Commenter.prototype.show = function() {
+Commenter.prototype.show = function () {
 	commenter.layer.fadeIn(500);
 }
-Commenter.prototype.toggle = function() {
+Commenter.prototype.toggle = function () {
 	// the dialog
 	if(commenter.layer.is(':visible')) {
 		commenter.dialog.dialog('close');
@@ -49,13 +50,13 @@ Commenter.prototype.toggle = function() {
 }
 
 /* canvas functions */
-Commenter.prototype.redrawLines = function() {
+Commenter.prototype.redrawLines = function () {
 	// clear the canvas
 	commenter.dynamic_ctx.clearRect(0, 0, commenter.dynamic_canvas.width, commenter.dynamic_canvas.height);
 	// redraw all lines
 	commenter.dynamic_ctx.beginPath();
 
-	$.each(commenter.dynamic_lines, function(k, v) {
+	$.each(commenter.dynamic_lines, function (k, v) {
 		dl = String(v).split(',');
 		// add the line
 		commenter.dynamic_ctx.moveTo(dl[0], dl[1]);
@@ -66,11 +67,11 @@ Commenter.prototype.redrawLines = function() {
 }
 
 /* the comment add functions */
-Commenter.prototype.loadComments = function() {
-	$.getJSON(commenter.json_source + '?' + Math.random().toString(36).substring(7), function(json) {
+Commenter.prototype.loadComments = function () {
+	$.getJSON(commenter.json_source + '?' + Math.random().toString(36).substring(7), function (json) {
 		if(json != null) {
 			commenter.oldJson = json;
-			$.each(json, function(v) {
+			$.each(json, function (v) {
 				// add the comment
 				commenter.addComment(
 					json[v]['name'],
@@ -85,7 +86,7 @@ Commenter.prototype.loadComments = function() {
 		}
 	});
 }
-Commenter.prototype.addComment = function(author, content, time, color, position) {
+Commenter.prototype.addComment = function (author, content, time, color, position) {
 	// create the static canvas points
 	if(commenter.static_canvas.getContext) {
 		commenter.static_ctx.beginPath();
@@ -99,7 +100,7 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 
 	// make the time readable
 	var date = new Date(time * 1000);
-	var r_time = date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+	var r_time = date.getHours() + ':' + date.getMinutes() + ' ' + date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear();
 
 	// check for dark colors to set the right font color
 	rgb = commenter.hexToRgb(color);
@@ -107,10 +108,14 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 
 	// create the comment
 	$('<div class="comment"></div>')
-		.css('left', (parseInt(position[0]) + 15) + 'px')
-		.css('top', (parseInt(position[1]) + 15) + 'px')
-		.css('color', fontColor)
-		.css('background', color)
+		.css(
+			{
+				'left':			(parseInt(position[0]) + 15) + 'px',
+				'top':			(parseInt(position[1]) + 15) + 'px',
+				'color':		fontColor,
+				'background':	color
+			}
+		)
 		.attr('id', time)
 		.append(
 			$('<header></header>')
@@ -128,7 +133,7 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 			.append(content)
 		)
 		.appendTo('#comments_innerlayer')
-		.click(function() {
+		.click(function () {
 			commenter.showEditDialog(time);
 			commenter.editEnabled = time;
 		});
@@ -138,7 +143,7 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 
 	// make it draggable
 	$('#' + time).draggable({
-		drag: function() {
+		drag: function () {
 			old = commenter.dynamic_lines[time];
 			pos = $('#' + time).position();
 			commenter.dynamic_lines[time] = [old[0], old[1], pos.left, pos.top];
@@ -146,7 +151,7 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 			commenter.redrawLines();
 		},
 		// ugly fix to draw the line always till the end
-		stop: function() {
+		stop: function () {
 			old = commenter.dynamic_lines[time];
 			pos = $('#' + time).position();
 			commenter.dynamic_lines[time] = [old[0], old[1], pos.left, pos.top];
@@ -157,24 +162,24 @@ Commenter.prototype.addComment = function(author, content, time, color, position
 }
 
 /* color functions */
-Commenter.prototype.rgbToHex = function(rgb) {
+Commenter.prototype.rgbToHex = function (rgb) {
 	// stolen from http://jqueryui.com/demos/slider/#colorpicker
 	var hex = [
 		rgb[0].toString(16),
 		rgb[1].toString(16),
 		rgb[2].toString(16)
 	];
-	$.each(hex, function(nr, val) {
+	$.each(hex, function (nr, val) {
 		if (val.length === 1) {
 			hex[nr] = '0' + val;
 		}
 	});
 	return hex.join('').toUpperCase();
 }
-Commenter.prototype.hexToRgb = function(hex) {
+Commenter.prototype.hexToRgb = function (hex) {
 	// from http://www.javascripter.net/faq/hextorgb.htm
 	function cutHex(h) {
-		return (h.charAt(0)=="#") ? h.substring(1,7):h
+		return (h.charAt(0)=='#') ? h.substring(1,7):h
 	}
 	
 	r = parseInt((cutHex(hex)).substring(0,2),16);
@@ -183,19 +188,19 @@ Commenter.prototype.hexToRgb = function(hex) {
 
 	return [r, g, b];
 }
-Commenter.prototype.textColorByRgb = function(rgb) {
+Commenter.prototype.textColorByRgb = function (rgb) {
 	if((rgb[0] + rgb[1] + rgb[2]) < 300) {
-		return "#ffffff";
+		return '#ffffff';
 	} else {
-		return "#000000";
+		return '#000000';
 	}
 }
 
 /* the comment generator dialog */
-Commenter.prototype.getCommentByTime = function(time) {
+Commenter.prototype.getCommentByTime = function (time) {
 	// get the comment
 	var comment, id;
-	$.each(commenter.oldJson, function(v) {
+	$.each(commenter.oldJson, function (v) {
 		if(commenter.oldJson[v]['time'] == time) {
 			comment = commenter.oldJson[v];
 			id = v;
@@ -203,7 +208,7 @@ Commenter.prototype.getCommentByTime = function(time) {
 	});
 	return [id, comment];
 }
-Commenter.prototype.showEditDialog = function(id) {
+Commenter.prototype.showEditDialog = function (id) {
 	comment = commenter.getCommentByTime(id);
 
 	if(comment != null) {
@@ -212,14 +217,14 @@ Commenter.prototype.showEditDialog = function(id) {
 		$('#comment_add_comment').val(comment[1]['comment']);
 	}
 }
-Commenter.prototype.createDialog = function() {
+Commenter.prototype.createDialog = function () {
 	commenter.layer.append('<div id="comments_modal" title="Create a new comment"><form><input placeholder="Name" type="text" id="comment_add_name" /><textarea placeholder="Comment" id="comment_add_comment"></textarea></form><h4>Choose a color:</h4><div id="comments_add_color_chooser"><div id="comment_add_color_red"></div><div id="comment_add_color_green"></div><div id="comment_add_color_blue"></div></div><div id="comment_add_color_field"></div></div>');
 
 	// create the dialog
 	var dialog = $('#comments_modal').dialog({
 		autoOpen:	false,
 		buttons: {
-			'Create the comment': function() {
+			'Create the comment': function () {
 				// get the color
 				var r = $('#comment_add_color_red').slider('value');
 				var g = $('#comment_add_color_green').slider('value');
@@ -252,7 +257,7 @@ Commenter.prototype.createDialog = function() {
 				$('#comment_add_comment').val('');
 				commenter.editEnabled = false;
 			},
-			'Cancel': function() {
+			'Cancel': function () {
 				$(this).dialog('close');
 				commenter.editEnabled = false;
 			}
@@ -266,7 +271,7 @@ Commenter.prototype.createDialog = function() {
 		max:	255,
 		value:	125,
 		range:	'min',
-		slide:	function() {
+		slide:	function () {
 			var r = $('#comment_add_color_red').slider('value');
 			var g = $('#comment_add_color_green').slider('value');
 			var b = $('#comment_add_color_blue').slider('value');
@@ -283,7 +288,7 @@ Commenter.prototype.createDialog = function() {
 	return dialog;
 }
 
-Commenter.prototype.userSetComment = function(author, comment, color, position, time){
+Commenter.prototype.userSetComment = function (author, comment, color, position, time){
 	// lock the file
 	var lockToken;
 	data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:shared /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
@@ -294,17 +299,13 @@ Commenter.prototype.userSetComment = function(author, comment, color, position, 
 		async:		false,
 		data:		data,
 		dataType:	'xml',
-		success:	function(text) {
+		success:	function (text) {
 			// get the lock token
-			//// firefox hack
-			if($.browser.mozilla) {
-				lockToken = $(text).find('D\\:href').text();
-			} else {
-				lockToken = $(text).find('href').text();
-			}
+			//// firefox hack: D\\:href
+			lockToken = $(text).find('D\\:href, href').text();
 			
 		}/*,
-		complete:	function(xhr, text) {
+		complete:	function (xhr, text) {
 			// check for a lock
 			if(xhr.status != 423) {
 				// deal with the existing lock. remember: it's only a second long
@@ -346,8 +347,8 @@ Commenter.prototype.userSetComment = function(author, comment, color, position, 
 		url:		commenter.json_source,
 		async:		false,
 		data:		JSON.stringify(commenter.oldJson),
-		complete:	function(xhr) {
-			if(String(xhr.status).substr(0, 2) == "20") {
+		complete:	function (xhr) {
+			if(String(xhr.status).substr(0, 2) == '20') {
 				everythingWentWell = true;
 			}
 		}
@@ -360,20 +361,17 @@ Commenter.prototype.userSetComment = function(author, comment, color, position, 
 		headers:	{'Lock-Token': '<' + lockToken + '>'},
 		url:		commenter.json_source,
 		async:		false,
-		complete:	function(xhr) {
+		complete:	function (xhr) {
 			// add the comment if everything went well
-			if(String(xhr.status).substr(0, 2) == "20") {
-				everythingWentWell = false;
+			if(String(xhr.status).substr(0, 2) == '20') {
+				everythingWentWell = true;
 			}
-		}
-	});
-	// get the latest version
-	$('.comment').ajaxStop(function() {
-		if(everythingWentWell == true) {
-			$(this).remove();
-			commenter.loadComments();
-		} else {
-			alert("Ooups, something went wrong!");
+			if(everythingWentWell == true) {
+				$('.comment').remove();
+				//setTimeout('commenter.loadComments()', 1500);
+			} else {
+				alert('Ooups, something went wrong!');
+			}
 		}
 	});
 	
