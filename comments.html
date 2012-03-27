@@ -3,16 +3,16 @@
 	<head>
 		<title>Comments?</title>
 		<meta charset="utf-8" />
-		<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
-		<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
 
 		<link type="text/css" rel="stylesheet" href="css/commenter.css" />
 		<script type="text/javascript" src="js/commenter.js"></script>
 		<script type="text/javascript">
+			var commenter;
 			$(document).ready(function() {
-				// generate a new commenter
-				window.cmts = new Commenter('#comments_layer', 'foo.comments.json');
-				window.cmts.show();
+				commenter = new Commenter('#comments_layer', 'foo.comments.json');
+				commenter.show();
 			});
 		</script>
 		<style type="text/css">
@@ -34,15 +34,14 @@
 	<body>
 		<div id="comments_layer"></div>
 		<header>
-			<h1>Hallo Welt!</h1><a id="toggler" href="javascript:window.cmts.toggle();">Toggle</a>
+			<h1>Hallo Welt!</h1><a id="toggler" href="javascript:commenter.toggle();">Toggle</a>
 		</header>
 		<article>
-			<span id="elem"></span>
 			<h2>Hier geht es weiter…</h2>
-			<p id="39">Lorem ipsum und so weiter…</p>
-			<p id="40">Lorem ipsum und so weiter…</p>
-			<p id="41">Lorem ipsum und so weiter…</p>
-			<p id="42">Lorem ipsum und so weiter…</p>
+			<p>Lorem ipsum und so weiter…</p>
+			<p>Lorem ipsum und so weiter…</p>
+			<p>Lorem ipsum und so weiter…</p>
+			<p>Lorem ipsum und so weiter…</p>
 			<p>qui. Qui semoveo Tubineus mancipo nam Desposco reddo intemporaliter Sufficio, cum aut pax se Erro, diu Ingressus qui Honestas roto vos hos vix Distinguo humus dignor. Cui leno ex suspicor Amor quibus res occido Consido oro noster lauvabrum sed Inquam haec eia Cumulus, ius lux Castrum ver Fatuo ymo res for Animus laxe Novem nec Teneo. Ego macto re stupeo Labor sus, ver ex aut exhorto sis aliter foetidus expono. Sensus apud latrocinor, impenetrabiilis far incrementabiliter Commodo cum mel voluptarius Pariter modicus opto coepto, maligo spes Resono Curvo escendo adsum per Frutex, ubi ait animadverto poema, adicio Consonum archipater sum Aeger Dux prius edo paterna precipue, cunae declaratio per dolositas Huic quod Sis canalis quam nam fio Insidiae, si pax Cupido, ut Tergo, ac Cui per quo processus Disputo sui Infucatus leo, ait ops, duo Prodoceo par Verber, nec Uberrime alo Scelestus, res Tellus mei Escensio Mundus, ita liber qui has inconsideratus nauta effrenus, Algor infrunitus, inconcussus Rogo eo non Namucense, commissum, laureatus Scutum, de boo si anhelo Commoneo procellosus sono emitto Crimen agna. Si subo Accubo castimonia hic ibi qua lux sto eu Pulcher Sem. Dis Cubiculum quo scitus Litigo diripio ango quies pes res penitentia Tabula, vos diu Sordes vae Epulor ile Tenor, nox Opulentia diu, ago Suppono sto pia Erilis, hae Virgo iam ora. Nam constat Lues huic eia qua vox ara proh ille se Ymber clango. Sive furca Proicio St extrudo. Hoc pestilencia tum byssus digredior. Per Caetera deduco gero pertinaciter. Sal Sanctus levo Rectum per vexamen et Reseco sino sed lea do for Esse identidem repromitto cur et Perpetior, stipo incrementabiliter, cervus ante hilaris, mire algor se Vena thorax frendo puto Magnopere ops tam prenda contineo. Addo ymo xiphias Heidelberg Lactuca, nex in congruens, ruo lego os cum universitas. Tellus vas neo prothoplastus Improviso cui te curvo. Eo privus ars Iussu infodio, ut se stipatores firmo, lac Decurro, fides Fruor, modio per opus M.</p>
 		</article>
 	</body>

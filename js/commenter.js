@@ -6,8 +6,9 @@ var Commenter = (function (jQuery) {
 
 	/* Dialog */
 	function Dialog(commenter, title, position) {
-		var instance = this;
-		this.id = Math.random().toString(36).substring(7);
+		var instance = this,
+			state;
+		this.id = 'x-' + Math.random().toString(36).substring(7);
 		this.commenter = commenter;
 
 		this.comment = $('<div id="' + this.id + '" class="comments-modal" title="' + title + '"><form onsubmit="return false;"><input placeholder="Name" type="text" class="comment-add-name" /><textarea placeholder="Comment" class="comment-add-comment"></textarea></form><h4>Choose a color:</h4></div>');
@@ -31,7 +32,7 @@ var Commenter = (function (jQuery) {
 			buttons:	{
 				'Save':	function () {
 					if (commenter.editEnabled !== false) {
-						commenter.setComment(
+						state = commenter.setComment(
 							$('#' + this.id + ' .comment-add-name').val(),
 							$('#' + this.id + ' .comment-add-comment').val(),
 							$('#' + this.id + ' .comment-add-colorchooser input[name=comment-add-color]:checked').val(),
@@ -39,14 +40,16 @@ var Commenter = (function (jQuery) {
 							commenter.editEnabled
 						);
 					} else {
-						commenter.setComment(
+						state = commenter.setComment(
 							$('#' + this.id + ' .comment-add-name').val(),
 							$('#' + this.id + ' .comment-add-comment').val(),
 							$('#' + this.id + ' .comment-add-colorchooser input[name=comment-add-color]:checked').val(),
 							position
 						);
 					}
-					instance.destroy();
+					if (state == true) {
+						instance.destroy();
+					}					
 				},
 				'Cancel':	function () {
 					instance.destroy();
@@ -277,7 +280,7 @@ var Commenter = (function (jQuery) {
 						'color':		fontColor,
 						'background':	color
 					})
-					.attr('id', time)
+					.attr('id', 'x-' + time)
 					.append(
 						$('<header></header>')
 							.append(
@@ -353,9 +356,9 @@ var Commenter = (function (jQuery) {
 				newJson;
 
 			// lock the file
-			data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:shared /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
+			data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:exclusive /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
 			$.ajax({
-				type:	'LOCK',
+				type:		'LOCK',
 				headers:	{'Timeout': 'Second-1000'},
 				url:		instance.jsonSource,
 				async:		false,
@@ -370,71 +373,77 @@ var Commenter = (function (jQuery) {
 					}
 				}
 			});
-			console.log('locked');
+			if (everythingWentWell == true) {
+				console.log('locked');
 
-			// reload the comments to prevent overwriting
-			this.loadComments();
+				// reload the comments to prevent overwriting
+				this.loadComments();
 
-			// generate the new json
-			if (this.editEnabled !== false) {
-				commentObj = this.getCommentByTime(time);
-			} else {
-				time = Math.round((new Date()).getTime() / 1000);
-			}
-
-			newJson = {
-				'name':		author,
-				'comment':	comment,
-				'position':	position,
-				'color':	color,
-				'time':		time
-			};
-
-			if (this.editEnabled !== false) {
-				this.oldJson.splice(commentObj[0], 1, newJson);
-			} else {
-				this.oldJson.push(newJson);
-			}
-
-			// push it to the server
-			$.ajax({
-				type:		'PUT',
-				headers:	{'If': '(<' + lockToken + '>)'},
-				url:		instance.jsonSource,
-				async:		false,
-				data:		JSON.stringify(instance.oldJson),
-				complete:	function (xhr) {
-					if (String(xhr.status).substr(0, 2) === '20') {
-						everythingWentWell = true;
-					} else {
-						everythingWentWell = false;
-					}
+				// generate the new json
+				if (this.editEnabled !== false) {
+					commentObj = this.getCommentByTime(time);
+				} else {
+					time = Math.round((new Date()).getTime() / 1000);
 				}
-			});
-			console.log('putted');
 
-			// unlock the file
-			$.ajax({
-				type:		'UNLOCK',
-				headers:	{'Lock-Token': '<' + lockToken + '>'},
-				url:		instance.jsonSource,
-				async:		false,
-				complete:	function (xhr) {
-					// add the comment if everything went well
-					if (String(xhr.status).substr(0, 2) === '20') {
-						everythingWentWell = true;
-					}
-					if (everythingWentWell === true) {
-						setTimeout(function () {
-							instance.loadComments();
-						}, 100);
+				newJson = {
+					'name':		author,
+					'comment':	comment,
+					'position':	position,
+					'color':	color,
+					'time':		time
+				};
 
-					} else {
-						alert('Ooups, something went wrong!');
-					}
+				if (this.editEnabled !== false) {
+					this.oldJson.splice(commentObj[0], 1, newJson);
+				} else {
+					this.oldJson.push(newJson);
 				}
-			});
-			console.log('unlocked');
+
+				// push it to the server
+				$.ajax({
+					type:		'PUT',
+					headers:	{'If': '(<' + lockToken + '>)'},
+					url:		instance.jsonSource,
+					async:		false,
+					data:		JSON.stringify(instance.oldJson),
+					complete:	function (xhr) {
+						if (String(xhr.status).substr(0, 2) === '20') {
+							everythingWentWell = true;
+						} else {
+							everythingWentWell = false;
+						}
+						console.log(String(xhr.status));
+					}
+				});
+				console.log('putted');
+
+				// unlock the file
+				$.ajax({
+					type:		'UNLOCK',
+					headers:	{'Lock-Token': '<' + lockToken + '>'},
+					url:		instance.jsonSource,
+					async:		false,
+					complete:	function (xhr) {
+						// add the comment if everything went well
+						if (String(xhr.status).substr(0, 2) === '20') {
+							everythingWentWell = true;
+						}
+						if (everythingWentWell === true) {
+							setTimeout(function () {
+								instance.loadComments();
+							}, 100);
+
+						} else {
+							alert('Ooups, something went wrong!');
+						}
+					}
+				});
+				console.log('unlocked');
+			} else {
+				alert("Something went wrong. Please try again.");
+			}
+			return everythingWentWell;
 		};
 
 	}(Commenter.prototype));
