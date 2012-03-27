@@ -4,6 +4,71 @@ var Commenter = (function (jQuery) {
 	var $ = jQuery.sub();
 	$.document = $(document);
 
+	/* WebDAV */
+	function WebDAV(url) {
+		this.url = url;
+	}
+	(function (fn) {
+		fn.lock = function () {
+			var instance = this,
+				statusCode,
+				data;
+
+			data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:exclusive /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
+
+			$.ajax({
+				type:		'LOCK',
+				headers:	{'Timeout': 'Second-1000'},
+				url:		instance.url,
+				async:		false,
+				data:		data,
+				dataType:	'xml',
+				success:	function (text) {
+					instance.lockToken = $(text).find('D\\:href, href').text();
+				},
+				complete:	function (xhr) {
+					statusCode = String(xhr.status);
+				}
+			});
+
+			return statusCode;
+		};
+		fn.put = function (data) {
+			var instance = this,
+				statusCode;
+
+			$.ajax({
+				type:		'PUT',
+				headers:	{'If': '(<' + instance.lockToken + '>)'},
+				url:		instance.url,
+				async:		false,
+				data:		data,
+				complete:	function (xhr) {
+					statusCode = String(xhr.status);
+				}
+			});
+
+			return statusCode;
+		};
+		fn.unlock = function () {
+			var instance = this,
+				statusCode;
+
+			$.ajax({
+				type:		'UNLOCK',
+				headers:	{'Lock-Token': '<' + instance.lockToken + '>'},
+				url:		instance.url,
+				async:		false,
+				complete:	function (xhr) {
+					statusCode = String(xhr.status);
+				}
+			});
+
+			return statusCode;
+		};
+	}(WebDAV.prototype));
+
+
 	/* Dialog */
 	function Dialog(commenter, title, position) {
 		var instance = this,
@@ -349,33 +414,15 @@ var Commenter = (function (jQuery) {
 
 		fn.setComment = function (author, comment, color, position, time) {
 			var instance = this,
-				everythingWentWell = false,
+				everythingWentWell = true,
 				lockToken,
 				data,
 				commentObj,
-				newJson;
+				newJson,
+				dav;
 
-			// lock the file
-			data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:exclusive /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
-			$.ajax({
-				type:		'LOCK',
-				headers:	{'Timeout': 'Second-1000'},
-				url:		instance.jsonSource,
-				async:		false,
-				data:		data,
-				dataType:	'xml',
-				success:	function (text) {
-					lockToken = $(text).find('D\\:href, href').text();
-				},
-				complete:	function (xhr) {
-					if (String(xhr.status).substr(0, 2) === '20') {
-						everythingWentWell = true;
-					}
-				}
-			});
-			if (everythingWentWell === true) {
-				console.log('locked');
-
+			dav = new WebDAV(this.jsonSource);
+			if (dav.lock().substr(0, 2) === '20') {
 				// reload the comments to prevent overwriting
 				this.loadComments();
 
@@ -400,49 +447,24 @@ var Commenter = (function (jQuery) {
 					this.oldJson.push(newJson);
 				}
 
-				// push it to the server
-				$.ajax({
-					type:		'PUT',
-					headers:	{'If': '(<' + lockToken + '>)'},
-					url:		instance.jsonSource,
-					async:		false,
-					data:		JSON.stringify(instance.oldJson),
-					complete:	function (xhr) {
-						if (String(xhr.status).substr(0, 2) === '20') {
-							everythingWentWell = true;
-						} else {
-							everythingWentWell = false;
-						}
-						console.log(String(xhr.status));
+				if (dav.put(JSON.stringify(instance.oldJson))) {
+					if (dav.unlock()) {
+						// reload the comments
+						this.loadComments();
+					} else {
+						everythingWentWell = false;
 					}
-				});
-				console.log('putted');
-
-				// unlock the file
-				$.ajax({
-					type:		'UNLOCK',
-					headers:	{'Lock-Token': '<' + lockToken + '>'},
-					url:		instance.jsonSource,
-					async:		false,
-					complete:	function (xhr) {
-						// add the comment if everything went well
-						if (String(xhr.status).substr(0, 2) === '20') {
-							everythingWentWell = true;
-						}
-						if (everythingWentWell === true) {
-							setTimeout(function () {
-								instance.loadComments();
-							}, 100);
-
-						} else {
-							alert('Ooups, something went wrong!');
-						}
-					}
-				});
-				console.log('unlocked');
+				} else {
+					everythingWentWell = false;
+				}
 			} else {
-				alert("Something went wrong. Please try again.");
+				everythingWentWell = false;
 			}
+
+			if (everythingWentWell === false) {
+				alert('Ooups… Something went wrong! Please try again.');
+			}
+
 			return everythingWentWell;
 		};
 
