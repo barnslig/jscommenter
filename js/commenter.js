@@ -47,9 +47,9 @@ var Commenter = (function (jQuery) {
 							position
 						);
 					}
-					if (state == true) {
+					if (state === true) {
 						instance.destroy();
-					}					
+					}
 				},
 				'Cancel':	function () {
 					instance.destroy();
@@ -373,7 +373,7 @@ var Commenter = (function (jQuery) {
 					}
 				}
 			});
-			if (everythingWentWell == true) {
+			if (everythingWentWell === true) {
 				console.log('locked');
 
 				// reload the comments to prevent overwriting
