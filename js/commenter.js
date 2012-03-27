@@ -422,7 +422,9 @@ var Commenter = (function (jQuery) {
 						everythingWentWell = true;
 					}
 					if (everythingWentWell === true) {
-						instance.loadComments();
+						setTimeout(function () {
+							instance.loadComments();
+						}, 100);
 
 					} else {
 						alert('Ooups, something went wrong!');
