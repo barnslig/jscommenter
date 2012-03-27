@@ -30,7 +30,7 @@ var Commenter = (function (jQuery) {
 			},
 			buttons:	{
 				'Save':	function () {
-					if (commenter.editEnabled !== 0) {
+					if (commenter.editEnabled !== false) {
 						commenter.setComment(
 							$('#' + this.id + ' .comment-add-name').val(),
 							$('#' + this.id + ' .comment-add-comment').val(),
@@ -128,7 +128,6 @@ var Commenter = (function (jQuery) {
 	}
 	(function (fn) {
 		fn.hide = function () {
-			//this.dialog.close();
 			this.container.fadeOut(500);
 		};
 		fn.show = function () {
@@ -138,7 +137,7 @@ var Commenter = (function (jQuery) {
 			this.container.fadeToggle(500);
 		};
 
-		/* canvas functions */
+		// canvas functions //
 		fn.createFullScreenCanvas = function (classNames) {
 			return $('<canvas>').attr({
 				'class':  classNames,
@@ -165,7 +164,7 @@ var Commenter = (function (jQuery) {
 			context.stroke();
 		};
 
-		/* color functions */
+		// color functions //
 		function rgbToHex(rgb) {
 			// from http://jqueryui.com/demos/slider/#colorpicker
 			var hex = [
@@ -205,7 +204,7 @@ var Commenter = (function (jQuery) {
 			return color;
 		}
 
-		/* the comment load- and add-functions */
+		// the comment load- and add-functions //
 		function randomURL(url) {
 			// look if there is already a query string
 			var anchor = document.createElement('a');
@@ -271,12 +270,13 @@ var Commenter = (function (jQuery) {
 				fontColor = textColorByRgb(rgb),
 
 				// create the comment
-				comment = $('<div class="comment">').css({
-					'left':			parseInt(position[0], 10) + 15,
-					'top':			parseInt(position[1], 10) + 15,
-					'color':		fontColor,
-					'background':	color
-				})
+				comment = $('<div class="comment">')
+					.css({
+						'left':			parseInt(position[0], 10) + 15,
+						'top':			parseInt(position[1], 10) + 15,
+						'color':		fontColor,
+						'background':	color
+					})
 					.attr('id', time)
 					.append(
 						$('<header></header>')
@@ -291,6 +291,7 @@ var Commenter = (function (jQuery) {
 					)
 					.append(
 						$('<article></article>')
+							.css('border-top-color', fontColor)
 							.append(content)
 					)
 					.draggable({
@@ -312,10 +313,10 @@ var Commenter = (function (jQuery) {
 					})
 					.click(function () {
 						instance.editEnabled = time;
-						var pos = $(this).position();
+						var pos = instance.getCommentByTime(time);
 
 						// create the edit-dialog
-						this.dialog = new Dialog(instance, 'Edit this comment', [pos.left - 15, pos.top - 15]);
+						this.dialog = new Dialog(instance, 'Edit this comment', [pos[1].position[0], pos[1].position[1]]);
 						this.dialog.setValues({
 							'name':		$(this).find('h4').text(),
 							'comment':	$(this).find('article').text(),
@@ -347,7 +348,9 @@ var Commenter = (function (jQuery) {
 			var instance = this,
 				everythingWentWell = false,
 				lockToken,
-				data;
+				data,
+				commentObj,
+				newJson;
 
 			// lock the file
 			data = '<?xml version="1.0" ?><D:lockinfo xmlns:D="DAV:"><D:lockscope><D:shared /></D:lockscope><D:locktype><D:write/></D:locktype></D:lockinfo>';
@@ -373,13 +376,13 @@ var Commenter = (function (jQuery) {
 			this.loadComments();
 
 			// generate the new json
-			if (this.editEnabled !== 0) {
-				var commentObj = this.getCommentByTime(time);
+			if (this.editEnabled !== false) {
+				commentObj = this.getCommentByTime(time);
 			} else {
 				time = Math.round((new Date()).getTime() / 1000);
 			}
 
-			var newJson = {
+			newJson = {
 				'name':		author,
 				'comment':	comment,
 				'position':	position,
@@ -387,7 +390,7 @@ var Commenter = (function (jQuery) {
 				'time':		time
 			};
 
-			if (this.editEnabled !== 0) {
+			if (this.editEnabled !== false) {
 				this.oldJson.splice(commentObj[0], 1, newJson);
 			} else {
 				this.oldJson.push(newJson);
