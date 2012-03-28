@@ -1,6 +1,7 @@
-/*global alert: false, jQuery: false, document: false */
-"use strict";
+/*global alert: false, jQuery: false, document: false, window: false */
 var Commenter = (function (jQuery) {
+	"use strict";
+
 	var $ = jQuery.sub();
 	$.document = $(document);
 
@@ -412,7 +413,7 @@ var Commenter = (function (jQuery) {
 			}
 		};
 
-		fn.setComment = function (author, comment, color, position, time) {
+		fn.setComment = function (author, content, color, position, time) {
 			var instance = this,
 				everythingWentWell = true,
 				lockToken,
@@ -435,7 +436,7 @@ var Commenter = (function (jQuery) {
 
 				newJson = {
 					'name':		author,
-					'comment':	comment,
+					'comment':	content,
 					'position':	position,
 					'color':	color,
 					'time':		time
@@ -450,7 +451,9 @@ var Commenter = (function (jQuery) {
 				if (dav.put(JSON.stringify(instance.oldJson))) {
 					if (dav.unlock()) {
 						// reload the comments
-						this.loadComments();
+						window.setTimeout(function () {
+							instance.loadComments();
+						}, 200);
 					} else {
 						everythingWentWell = false;
 					}
