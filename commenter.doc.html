@@ -1,138 +1,236 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>jsCommenter Dokumentation</title>
+		<title>Dokumentation</title>
 		<meta charset="utf-8" />
 		<style type="text/css">
 			body {
-				font-family:	sans-serif;
+				font-family:		sans-serif;
 			}
-			h3 i {
-				font-weight:	normal;
+			i {
+				font-family:		serif;
+				font-weight:		normal;
+				color:				#2a00ff;
+			}
+			p {
+				font-size:			14px;
+			}
+			small {
+				font-size:			11px;
+			}
+			header {
+				border-bottom:		1px gray solid;
+				margin-right:		270px;
+			}
+			header h1 small {
+				font-size:			13px;
+				font-weight:		normal;
+			}
+			nav {
+				position:			fixed;
+				right:				10px;
+				top:				10px;
+				padding-right:		20px;
+				border:				1px black solid;
+				box-shadow:			3px 3px 0 #aaa;
+				background:			white;
+			}
+			nav h5 {
+				margin:				15px;
+				padding:			0;
+			}
+			footer {
+				border-top:			1px gray solid;
+			}
+			h5 {
+				font-size:			15px;
 			}
 		</style>
 	</head>
 	<body>
+		<header>
+			<h1>
+				jsCommenter
+				<small>Ein auf jQuery basierendes Kommentiersystem für Webseiten.</small>
+			</h1>
+		</header>
+		<nav>
+			<h5>Navigation</h5>
+			<ul>
+				<li><a href="#library">JavaScript-Bibliothek</a></li>
+				<li><a href="#comment-json">JSON-Kommentardateiaufbau</a></li>
+				<li><a href="#vizard-integration">Integration in Vizard</a></li>
+				<li><a href="#example">Beispieleinbindung</a></li>
+			</ul>
+		</nav>
 		<article>
-			<h1>JavaScript Bibliothek</h1>
+			<a name="library"></a>
+			<h2>JavaScript-Bibliothek</h2>
+			<p>Bitte beachten: <i>.WebDAV()</i> und <i>.Dialog()</i> sind nicht von „außen“ erreichbar. Sie dienen nur der Dokumentation der internen Abläufe.</p>
 			<ul>
 				<li>
-					<h2>Commenter(layer, json_url)</h2>
-					<p>Erstellt eine neue Kommentarebene die sich über die gesamte Webseite legt.</p>
-					<p>Es werden automatisch folgende Funktionen aufgerufen: <b><i>.loadComments()</i></b></p>
-					<p><i>layer</i> ist ein <a href="http://api.jquery.com/category/selectors/">jQuery-kompatibler Selektorstring</a>.</p>
-					<p><i>json_url</i> ist ein String der eine URL zu der JSON-Datei enthält die die Kommentare beinhaltet.</p>
+					<h3>Commenter(<i>layer, jsonSource</i>)</h3>
+					<p>Liefert beim Aufruf ein <i>Commenter()</i>-Objekt (Siehe weiter unten) zurück.</p>
 					<ul>
 						<li>
-							<h3>.hide()</h3>
-							<p>Versteckt die Kommentare.</p>
+							<h4>WebDAV(<i>url</i>)</h4>
+							<p>Eine einfache Klasse zur Bearbeitung von Dateien via WebDAV.</p>
+							<ul>
+								<li>
+									<h5>.lock()</h5>
+									<p>Setzt einen exklusiven Schreibschutz mit einer Verfallszeit von einer Sekunde auf die beim Klassenaufruf übergebene Datei.</p> 
+									<p><strong>Rückgabewert:</strong> Der HTTP-Statuscode der Antwort des Servers.</p>
+								</li>
+								<li>
+									<h5>.put(<i>data</i>)</h5>
+									<p>Schreibt die übergebenen Daten in die beim Klassenaufruf übergebene Datei.</p>
+									<p><strong>Rückgabewert:</strong> Der HTTP-Statuscode der Antwort des Servers.</p>
+								</li>
+								<li>
+									<h5>.unlock()</h5>
+									<p>Entfernt den Schreibschutz auf die beim Klassenaufruf übergebene Datei.</p>
+									<p><strong>Rückgabewert:</strong> Der HTTP-Statuscode der Antwort des Servers.</p>
+								</li>
+							</ul>
 						</li>
 						<li>
-							<h3>.show()</h3>
-							<p>Zeigt die Kommentare</p>
+							<h4>Dialog(<i>commenter, title, [pos_x, pos_y]</i>)</h4>
+							<p>Erzeugt einen neuen Dialog zur Änderung bzw. Erstellung eines Kommentars.</p>
+							<p><i>commmenter</i> ist ein <i>Commenter()</i>-Objekt.</p>
+							<p><i>title</i> wird als String angegeben.</p>
+							<p><i>pos_x</i> und <i>pos_y</i> werden in Pixeln vom linken und oberen Rand angegeben.</p>
+							<ul>
+								<li>
+									<h5>.open()</h5>
+									<p>Öffnet den Dialog.</p>
+								</li>
+								<li>
+									<h5>.close()</h5>
+									<p>Schließt den Dialog. <strong>Achtung:</strong> Der Dialog wird nur geschlossen, <u>nicht</u> entfernt.</p>
+								</li>
+								<li>
+									<h5>.destroy()</h5>
+									<p>Entfernt den Dialog endgültig.</p>
+								</li>
+								<li>
+									<h5>.addColor(<i>color</i>)</h5>
+									<p>Fügt eine Farbe dem Farbenwähler hinzu.</p>
+									<p><i>color</i> wird als HEX-Farbwert angegeben.</p>
+								</li>
+								<li>
+									<h5>.setValues(<i>{'name': '', 'comment': '', 'color': ''}</i>)</h5>
+									<p>Setzt die Werte des Formulars im Dialog.</p>
+								</li>
+							</ul>
 						</li>
 						<li>
-							<h3>.toggle()</h3>
-							<p>Zeigt die Kommentare im Fall dass diese ausgeblendet waren, versteckt diese sollten sie eingeblendet sein.</p>
-						</li>
-						<li>
-							<h3>.createDialog()</h3>
-							<p>Generiert einen Dialog zur Erstellung eines Kommentars.</p>
-							<p><b>Rückgabewert:</b> Ein jQuery Dialog-Objekt.</p>
-						</li>
-						<li>
-							<h3>.addComment(<i>author, content, time, color, [pos_x, pos_y]</i>)</h3>
-							<p>Fügt der Kommentarebene ein Kommentar hinzu. Fügt <u>kein</u> Kommentar in die Kommentar-Datei ein.</p>
-							<p><i>author</i> und <i>content</i> werden als String angegeben.</p>
-							<p>Die Farbe wird als HEX-Farbwert angegeben.</p>
-							<p>Die Zeit wird als UNIX-Timestamp angegeben.</p>
-							<p>Die Position wird in Pixeln angegeben.</p>
-						</li>
-						<li>
-							<h3>.userAddComment(<i>author, comment, color, [pos_x, pos_y]</i>)</h3>
-							<p>Fügt der Datei auf dem Server sowie der Kommentarebene ein Kommentar hinzu.</p>
-							<p><i>author</i> und <i>content</i> werden als String angegeben.</p>
-							<p>Die Farbe wird als HEX-Farbwert angegeben.</p>
-							<p>Die Position wird in Pixeln angegeben.</p>
-						</li>
-						<li>
-							<h3>.loadComments()</h3>
-							<p>Ruft alle Kommentare von dem beim Aufruf der Klasse übergebenen Pfad einer JSON-Datei ab und fügt diese Kommentare der Kommentarebene hinzu.</p>
-							<p><b>Achtung:</b> Diese Funktion wird beim Aufruf der Klasse mit ausgeführt und muss im Normalfall nicht aufgerufen zu werden.</p>
-						</li>
-						<li>
-							<h3>.redrawLines()</h3>
-							<p>Zeichnet die Verbindungslinien zwischen den Kommentaren und den Kommentarpunkten neu. Wird beim Verschieben eines Kommentars von alleine ausgeführt und muss im Normalfall nicht separat ausgeführt werden.</p>
-						</li>
-						<li>
-							<h3>.rgbToHex(<i>[r, g, b]</i>)</h3>
-							<p>Konvertiert einen RGB-Farbwert in einen HEX-Farbwert.</p>
-							<p><b>Rückgabewert:</b> String mit einem HEX-Farbwert <u>ohne</u> anführendes <i>#</i>.</p>
-						</li>
-						<li>
-							<h3>.hexToRgb(<i>hex</i>)</h3>
-							<p>Konvertiert einen HEX-Farbwert in einen RGB-Farbwert.</p>
-							<p><b>Rückgabewert:</b> Liste mit den RGB-Farbwerten: <i>[r, g, b]</i></p>
-						</li>
-						<li>
-							<h3>.textColorByRgb(<i>[r, g, b]</i>)</h3>
-							<p>Gibt bei einem hellen Farbwert <i>#000000</i> (schwarz) zurück und bei einem dunklen Farbwert <i>#ffffff</i> (weiß) zurück.</p>
+							<h4>Commenter(<i>layer, jsonSource</i>)</h4>
+							<p>Erzeugt ein neues Kommentiersystem.</p>
+							<p><i>layer</i> ist ein String und gibt einen <a href="http://api.jquery.com/category/selectors/">jQuery-kompatiblen Selektor</a> an.</p>
+							<p><i>jsonSource</i> ist die URL zur JSON-Kommentardatei.</p>
+							<ul>
+								<li>
+									<h5>.hide()</h5>
+									<p>Versteckt die Kommentarebene.</p>
+								</li>
+								<li>
+									<h5>.show()</h5>
+									<p>Zeigt die Kommentarebene.</p>
+								</li>
+								<li>
+									<h5>.toggle()</h5>
+									<p>Zeigt die Kommentarebene im Fall dass diese ausgeblendet waren, versteckt diese sollten sie eingeblendet sein.
+								</li>
+								<li>
+									<h5>.createFullScreenCanvas(<i>classNames</i>)</h5>
+									<p>Erzeugt ein neues HTML5-Canvas.</p>
+									<p><strong>Rückgabewert:</strong> Ein jQuery-Objekt eines <i>&lt;canvas&gt;</i>-Elements mit der Höhe und Breite des Dokuments sowie den übergebenen Klassen.
+								</li>
+								<li>
+									<h5>.redrawLines()</h5>
+									<p>Zeichnet die Verbindungslinien zwischen den Kommentaren und den Kommentarpunkten neu. Wird beim Verschieben eines Kommentars von alleine ausgeführt und muss im Normalfall nicht separat ausgeführt werden.</p>
+								</li>
+								<li>
+									<h5>.loadComments()</h5>
+									<p>Leert die Kommentarebene, ruft alle Kommentare von dem beim Aufruf der Klasse übergebenen Pfad einer JSON-Datei ab und fügt diese Kommentare dann der Kommentarebene hinzu.</p>
+								</li>
+								<li>
+									<h5>.getCommentByTime(<i>time</i>)</h5>
+									<p>Findet das Objekt eines Kommentars anhand des Erstellungszeitpunktes.</p>
+									<p><i>time</i> wird als UNIX-Timestamp angegeben.</p>
+									<p><strong>Rückgabewert:</strong> Eine Liste. Das erste Element enthält den Key des Kommentars in der JSON-Liste, das zweite Element enthält das Objekt des Kommentars.</p>
+								</li>
+								<li>
+									<h5>.addComment(<i>author, content, time, color, [pos_x, pos_y]</i>)</h5>
+									<p>Fügt der Kommentarebene ein Kommentar hinzu und erstellt den Punkt auf der statischen Canvas-Schicht. Nebenher wird die Linie auf der dynamischen Canvas-Schicht erzeugt und die Handler für <i>click-</i> und <i>drag</i> gesetzt. Fügt <u>kein</u> Kommentar in die Kommentar-Datei ein.</p>
+									<p><i>author</i> und <i>content</i> werden als String angegeben.</p>
+									<p><i>time</i> wird als UNIX-Timestamp angegeben.</p>
+									<p><i>color</i> wird als HEX-Farbwert angegeben.</p>
+									<p><i>pos_x</i> und <i>pos_y</i> werden in Pixeln vom linken und oberen Rand angegeben.</p>
+								</li>
+								<li>
+									<h5>.setComment(<i>author, content, color, [pos_x, pos_y], <small>time</small></i>)</h5>
+									<p>Fügt der Datei auf dem Server ein Kommentar hinzu. Dabei wird die Kommentarebene neu geladen, sodass die Änderung sichtbar wird.</p>
+									<p><i>author</i> und <i>content</i> werden als String angegeben.</p>
+									<p><i>time</i> wird als UNIX-Timestamp angegeben.</p>
+									<p><i>color</i> wird als HEX-Farbwert angegeben.</p>
+									<p><i>pos_x</i> und <i>pos_y</i> werden in Pixeln vom linken und oberen Rand angegeben.</p>
+									<p><i>time</i> kann optional angegeben werden. Wird <i>time</i> angegeben, versucht die Methode ein bereits vorhandenen Kommentar zu ändern statt einen neuen zu generieren.</p>
+									<p><strong>Rückgabewert:</strong> <i>true</i> oder <i>false</i>.
+								</li>
+							</ul>
 						</li>
 					</ul>
 				</li>
 			</ul>
-			<h1>JSON-Aufbau</h1>
-			<pre>
-[
+			<a name="comment-json"></a>
+			<h2>JSON-Kommentardateiaufbau</h2>
+			<pre><code>[
 	{
-		"name":		"leonard",
-		"comment":	"Geht das?",
-		"position":	[30,60],
-		"color":	"#0092FF",
-		"time":		1332238700
+		"name":		"foobar",
+		"comment":	"test!",
+		"position":	[425,134],
+		"color":	"#b80000",
+		"time":		1332844233
 	},
 	{
-		"name":		"max muster",
-		"comment":	"scheinbar.",
-		"position":	[200, 400],
-		"color":	"#007D7D",
-		"time":		1332329016
+		"name":		"leonard",
+		"comment":	"ofdahfhew9fhas9fha9",
+		"position":	[1020,253],
+		"color":	"#ffbb7d",
+		"time":		1332844245
 	}
-]
-			</pre>
-			<h1>Beispiel</h1>
-			<pre>
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-	&lt;head&gt;
-		&lt;title&gt;jsCommenter Test&lt;/title&gt;
-		&lt;meta charset="utf-8" /&gt;
-		&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"&gt;&lt;/script&gt;
-		&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"&gt;&lt;/script&gt;
-
-		&lt;link type="text/css" rel="stylesheet" href="css/commenter.css" /&gt;
-		&lt;script type="text/javascript" src="js/commenter.js"&gt;&lt;/script&gt;
-		&lt;script type="text/javascript"&gt;
-			$(document).ready(function() {
-				window.cmts = new Commenter('#comments_layer', 'foo.comments.json');
-				window.cmts.show();
-			});
-		&lt;/script&gt;
-	&lt;/head&gt;
-	&lt;body&gt;
-		&lt;div id="comments_layer"&gt;&lt;/div&gt;
-	&lt;/body&gt;
-&lt;/html&gt;
-			</pre>
-			<h1>Integration in Vizard</h1>
-			<p>Die Integration in Vizard erfordert keine weiteren Vorkehrungen neben den üblichen zur Nutzung von jsCommenter.</p>
-			<h1>To-Do:</h1>
-			<ul>
-				<li>Doppelte Erstellung der Kommentare durch loadComments() verhindern</li>
-				<li>Lösung für das Displaygrößenproblem finden</li>
-				<li>Möglichkeit zur Bearbeitung und Löschung von Kommentaren bauen</li>
-				<li>(Rechtemanagement)</li>
-			</ul>
+]</code></pre>
+			<a name="vizard-integration"></a>
+			<h2>Integration in Vizard</h2>
+			<p>Die Integration in Vizard erfordert keine weiteren Vorkehrungen neben denen, die auch im Normalfall zur Einrichtung der beiden Systeme notwendig wären.</p>
+			<a name="example"></a>
+			<h2>Beispieleinbindung</h2>
+<pre style='color:#000000;background:#ffffff;'><span style='color:#7f0055; '>&lt;!DOCTYPE html></span>
+<span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>html</span><span style='color:#7f0055; '>></span>
+    <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>head</span><span style='color:#7f0055; '>></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>title</span><span style='color:#7f0055; '>></span>Comments?<span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>title</span><span style='color:#7f0055; '>></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>meta</span> charset=<span style='color:#2a00ff; '>"utf-8"</span> <span style='color:#7f0055; '>/></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"</span><span style='color:#7f0055; '>></span><span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>script</span><span style='color:#7f0055; '>></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"</span><span style='color:#7f0055; '>></span><span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>script</span><span style='color:#7f0055; '>></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>link</span> type=<span style='color:#2a00ff; '>"text/css"</span> rel=<span style='color:#2a00ff; '>"stylesheet"</span> href=<span style='color:#2a00ff; '>"css/commenter.css"</span> <span style='color:#7f0055; '>/></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>script type="text/javascript" src="js/commenter.js"</span><span style='color:#7f0055; '>></span><span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>script</span><span style='color:#7f0055; '>></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>script type="text/javascript"</span><span style='color:#7f0055; '>></span>
+            <span style='color:#7f0055; font-weight:bold; '>var</span> commenter;
+            $(document).ready(<span style='color:#7f0055; font-weight:bold; '>function</span>() {
+                commenter = <span style='color:#7f0055; font-weight:bold; '>new</span> Commenter(<span style='color:#2a00ff; '>'#comments_layer'</span>, <span style='color:#2a00ff; '>'foo.comments.json'</span>);
+                commenter.show();
+            });
+        <span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>script</span><span style='color:#7f0055; '>></span>
+    <span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>head</span><span style='color:#7f0055; '>></span>
+    <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>body</span><span style='color:#7f0055; '>></span>
+        <span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>div</span> id=<span style='color:#2a00ff; '>"comments_layer"</span><span style='color:#7f0055; '>></span><span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>div</span><span style='color:#7f0055; '>></span>
+    <span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>body</span><span style='color:#7f0055; '>></span>
+<span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>html</span><span style='color:#7f0055; '>></span>
+</pre>
 		</article>
+		<footer>
+			<p>Code und weitere Informationen auf <a href="https://github.com/telelo/jscommenter">github</a></p>
+		</footer>
 	</body>
 </html>
