@@ -1,68 +1,141 @@
 $(document).ready(function() {
 	describe("Commenter", function() {
-		var commenter = new Commenter('#krebs', '../foo.comments.json');
-		commenter.hide();
-		var testComment;
-
-		it('should be able to show', function() {
-			commenter.show();
-			waits(600);
-			expect(commenter.container.css('display')).toMatch('block');
+		beforeEach(function() {	
+			this.commenter = new Commenter('#krebs', '../foo.comments.json');
+			this.commenter.hide();
 		});
-		/*
-		it('should be able to hide', function() {
-			commenter.hide();
-			waits(600);
-			expect(commenter.container.css('display')).not.toMatch('block');
-		});
-		*/
 
 		it('should be able to create a fullscreen canvas', function() {
-			expect(commenter.createFullScreenCanvas('test')).toBe('canvas.test');
+			expect(this.commenter.createFullScreenCanvas('test')).toBe('canvas.test');
 		});
 
 		it('should be able to create a comment', function() {
-			// test creating a new comment
-			var newComment = commenter.setComment('leonard', 'testbla!', '#00ff00', [100, 100]);
-			expect(newComment).toBeTruthy();
-			testComment = commenter.oldJson[commenter.oldJson.length - 1];
-			expect(testComment.comment).toMatch('testbla!');
+			var lockCalled = false,
+				putCalled = false,
+				unlockCalled = false;
+			(function(fn) {
+				fn.lock = function() {
+					lockCalled = true;
+					return "204";
+				};
+				fn.put = function(data) {
+					putCalled = true;
+					return "204";
+				};
+				fn.unlock = function() {
+					unlockCalled = true;
+					return "204";
+				};
+			}(this.commenter.WebDAV.prototype));
+			spyOn(this.commenter, 'loadComments');
+			this.commenter.oldJson = [];
 
-			// test editing a comment
-			var editComment = commenter.setComment('leonard', 'testbla?', '#00ff00', [100, 100], testComment.time);
-			testComment = commenter.oldJson[commenter.oldJson.length - 1];
-			expect(testComment.comment).toMatch('testbla?');
+			// test creating a new comment
+			var newComment = this.commenter.setComment('leonard', 'testbla!', '#00ff00', [100, 100]);
+			expect(newComment).toBeTruthy();
+			expect(this.commenter.loadComments).toHaveBeenCalled();
+			expect(lockCalled).toBeTruthy();
+			expect(putCalled).toBeTruthy();
+			expect(unlockCalled).toBeTruthy();
+			expect(this.commenter.oldJson.length).toBe(1);
+		});
+
+		it('should be able to edit a comment', function() {
+			var lockCalled = false,
+				putCalled = false,
+				unlockCalled = false;
+			(function(fn) {
+				fn.lock = function() {
+					lockCalled = true;
+					return "204";
+				};
+				fn.put = function(data) {
+					putCalled = true;
+					return "204";
+				};
+				fn.unlock = function() {
+					unlockCalled = true;
+					return "204";
+				};
+			}(this.commenter.WebDAV.prototype));
+			spyOn(this.commenter, 'loadComments');
+			this.commenter.editEnabled = [
+				{
+					"name": "leonard",
+					"comment": "testbla!",
+					"position": [100, 100],
+					"color": "#00ff00",
+					"time": 1333023608
+				}
+			];
+			this.commenter.editEnabled = 1333023608;
+
+			var editComment = this.commenter.setComment('leonard', 'testbla?', '#00ff00', [100, 100]);
+			expect(editComment).toBeTruthy();
+			expect(this.commenter.loadComments).toHaveBeenCalled();
+			expect(lockCalled).toBeTruthy();
+			expect(putCalled).toBeTruthy();
+			expect(unlockCalled).toBeTruthy();
+			expect(this.commenter.oldJson.length).toBe(1);
+			expect(this.commenter.oldJson[0].comment).toBe("testbla?");
+			expect(this.editEnabled).toBeFalsy();
 		});
 
 		it('should be able to load comments', function() {
-			//commenter.oldJson = null;
-			commenter.innerLayer.append('<div class="comment" id="testbla"></div>');
+			spyOn(this.commenter, 'randomURL');
+			spyOn(this.commenter.dynamicCTX, 'clearRect');
+			spyOn(this.commenter.staticCTX, 'clearRect');
+			spyOn(this.commenter.$, 'ajax').andCallFake(function(params) {
+				params.success(
+					[
+						{
+							"name": "leonard",
+							"comment": "testbla!",
+							"position": [100, 100],
+							"color": "#00ff00",
+							"time": 1333023608
+						}
+					]
+				);
+			});
+			spyOn(this.commenter, 'addComment');
 
-			commenter.loadComments();
+			this.commenter.loadComments();
 
-			waits(600);
-
-			// check if deleting works well
-			expect(commenter.innerLayer.find('#testbla').length).toBe(0);
-			// check if loading new comments works well
-			expect(commenter.innerLayer.find('.comment').length).not.toBe([]);
-			// check if setting the json variable works well
-			expect(commenter.oldJson).not.toBeNull();										// depends on the previous test
+			expect(this.commenter.staticCTX.clearRect).toHaveBeenCalled();
+			expect(this.commenter.dynamicCTX.clearRect).toHaveBeenCalled();
+			expect(this.commenter.$.ajax).toHaveBeenCalled();
+			expect(this.commenter.addComment).toHaveBeenCalled();
 		});
 
 		it('should be able to add a comment', function() {
-			commenter.addComment('leonard', 'testbla?', 123456, '#00ff00', [100, 100]);
+			this.commenter.dynamicLines = {}
+			spyOn(this.commenter.staticCTX, 'arc');
+			spyOn(this.commenter.innerLayer, 'append');
+			spyOn(this.commenter, 'redrawLines');
 
-			waits(600);
+			this.commenter.addComment('leonard', 'testbla?', 1333023608, '#00ff00', [100, 100])
 
-			expect(commenter.innerLayer.find('div#x-123456').length).not.toBe(0);			// test if the comment is created
-			expect(commenter.innerLayer.find('div#x-123456')).toHandle('click');			// test if the click handler is generated
-			expect(commenter.innerLayer.find('div#x-123456')).toHaveClass('ui-draggable');	// test if the draggable is generated
+			expect(this.commenter.innerLayer.append).toHaveBeenCalled();
+			expect(this.commenter.staticCTX.arc).toHaveBeenCalled();
+			expect(this.commenter.redrawLines).toHaveBeenCalled();
+			expect(this.commenter.dynamicLines[1333023608]).not.toBeNull();
 		});
 
-		it('should be able to get a comment by a timestamp', function() {					// depends on the create-a-comment-test
-			var comment = commenter.getCommentByTime(testComment.time);
-			expect(comment[1].comment).toMatch(testComment.comment);
+		it('should be able to get a comment by a timestamp', function() {
+			this.commenter.oldJson = [
+					{
+						"name": "leonard",
+						"comment": "testbla!",
+						"position": [100, 100],
+						"color": "#00ff00",
+						"time": 1333023608
+					}
+				];
+
+			var comment = this.commenter.getCommentByTime(1333023608);
+
+			expect(comment[1].comment).toMatch("testbla!");
 		});
 	});
 });

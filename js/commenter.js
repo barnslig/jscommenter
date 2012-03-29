@@ -36,6 +36,7 @@ var Commenter = (function (jQuery) {
 				type:		'LOCK',
 				headers:	{'Timeout': 'Second-1000'},
 				url:		instance.url,
+				async:		false,
 				data:		data,
 				dataType:	'xml',
 				success:	function (text) {
@@ -56,6 +57,7 @@ var Commenter = (function (jQuery) {
 				type:		'PUT',
 				headers:	{'If': '(<' + instance.lockToken + '>)'},
 				url:		instance.url,
+				async:		false,
 				data:		data,
 				complete:	function (xhr) {
 					statusCode = String(xhr.status);
@@ -72,6 +74,7 @@ var Commenter = (function (jQuery) {
 				type:		'UNLOCK',
 				headers:	{'Lock-Token': '<' + instance.lockToken + '>'},
 				url:		instance.url,
+				async:		false,
 				complete:	function (xhr) {
 					statusCode = String(xhr.status);
 				}
@@ -172,6 +175,8 @@ var Commenter = (function (jQuery) {
 	// Here we come to the serious part of the code: The commenter itself. This object gets returned if you create a new Commenter.
 	function Commenter(layer, jsonSource) {
 		var instance = this;
+		this.WebDAV = WebDAV;
+		this.$ = $;
 		this.layer = $(layer);
 		this.jsonSource  = jsonSource;
 		this.editEnabled = false;
@@ -302,7 +307,7 @@ var Commenter = (function (jQuery) {
 		// #### The comment load- and add-functions
 
 		// Function to create and append a random string to an url to enforce the browser to reload the file
-		function randomURL(url) {
+		fn.randomURL = function (url) {
 			// Look if there is already a query string
 			var anchor = document.createElement('a');
 			anchor.href = url;
@@ -314,32 +319,37 @@ var Commenter = (function (jQuery) {
 			}
 
 			return anchor.href;
-		}
+		};
 
 		// Function to clear the canvases and the comments layer and load all comments from the JSON source
 		fn.loadComments = function () {
-			var url = randomURL(this.jsonSource), instance = this;
+			var url = this.randomURL(this.jsonSource),
+				instance = this;
 
 			// Delete all existing comments
 			this.dynamicCTX.clearRect(0, 0, this.dynamicCanvas.width, this.dynamicCanvas.height);
 			this.staticCTX.clearRect(0, 0, this.staticCanvas.width, this.staticCanvas.height);
 			this.innerLayer.find('.comment').remove();
 
-			$.getJSON(url, function (json) {
-				if (json) {
-					instance.oldJson = json;
+			$.ajax({
+				url:		url,
+				dataType:	'json',
+				success:	function (json) {
+					if (json) {
+						instance.oldJson = json;
 
-					$.each(json, function (v) {
-						instance.addComment(
-							this.name,
-							this.comment,
-							this.time,
-							this.color,
-							this.position
-						);
-					});
-				} else {
-					instance.oldJson = [];
+						$.each(json, function (v) {
+							instance.addComment(
+								this.name,
+								this.comment,
+								this.time,
+								this.color,
+								this.position
+							);
+						});
+					} else {
+						instance.oldJson = [];
+					}
 				}
 			});
 		};
@@ -446,24 +456,25 @@ var Commenter = (function (jQuery) {
 
 		// Function to create a new comment in the JSON source file
 		// Please notice: This function is using the loadComments()-Function so you don't need to call addComment() on creating a new comment
-		fn.setComment = function (author, content, color, position, time) {
+		fn.setComment = function (author, content, color, position) {
 			var instance = this,
 				everythingWentWell = true,
 				lockToken,
 				data,
 				commentObj,
 				newJson,
-				dav;
+				dav,
+				time;
 
 			dav = new WebDAV(this.jsonSource);
-			alert(dav.lock());
 			if (dav.lock().substr(0, 2) === '20') {
 				// Reload the comments to prevent overwriting
 				this.loadComments();
 
 				// Generate the new JSON
 				if (this.editEnabled !== false) {
-					commentObj = this.getCommentByTime(time);
+					commentObj = this.getCommentByTime(this.editEnabled);
+					time = this.editEnabled;
 				} else {
 					time = Math.round((new Date()).getTime() / 1000);
 				}
@@ -482,8 +493,8 @@ var Commenter = (function (jQuery) {
 					this.oldJson.push(newJson);
 				}
 
-				if (dav.put(JSON.stringify(instance.oldJson))) {
-					if (dav.unlock()) {
+				if (dav.put(JSON.stringify(instance.oldJson)).substr(0, 2) === '20') {
+					if (dav.unlock().substr(0, 2) === '20') {
 						// Reload the comments
 						window.setTimeout(function () {
 							instance.loadComments();
