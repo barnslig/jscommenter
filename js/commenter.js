@@ -1,15 +1,30 @@
+// Positions are always measured in pixels.
+//
+// RGB-Colors are always passend in a list. Example: 
+//
+//      this.textColorByRgb([255, 0 200]);
+//
+// Please look at [Github](https://github.com/telelo/jscommenter) for additional informations
+
+// ## Main Documentation
+
 /*global alert: false, jQuery: false, document: false, window: false */
+
+// Returns a Commenter()-Object (see below)
 var Commenter = (function (jQuery) {
 	"use strict";
 
 	var $ = jQuery.sub();
 	$.document = $(document);
 
-	/* WebDAV */
+	// ### WebDAV
+	// This is a helper function to provide the commenter easy methodes to lock, unlock and put into files via WebDAV
 	function WebDAV(url) {
 		this.url = url;
 	}
+	// The only thing that the methodes are returning is the http status code of the servers response
 	(function (fn) {
+		// The lock has a 1-Second-Timeout 
 		fn.lock = function () {
 			var instance = this,
 				statusCode,
@@ -21,7 +36,6 @@ var Commenter = (function (jQuery) {
 				type:		'LOCK',
 				headers:	{'Timeout': 'Second-1000'},
 				url:		instance.url,
-				async:		false,
 				data:		data,
 				dataType:	'xml',
 				success:	function (text) {
@@ -42,7 +56,6 @@ var Commenter = (function (jQuery) {
 				type:		'PUT',
 				headers:	{'If': '(<' + instance.lockToken + '>)'},
 				url:		instance.url,
-				async:		false,
 				data:		data,
 				complete:	function (xhr) {
 					statusCode = String(xhr.status);
@@ -59,7 +72,6 @@ var Commenter = (function (jQuery) {
 				type:		'UNLOCK',
 				headers:	{'Lock-Token': '<' + instance.lockToken + '>'},
 				url:		instance.url,
-				async:		false,
 				complete:	function (xhr) {
 					statusCode = String(xhr.status);
 				}
@@ -70,7 +82,8 @@ var Commenter = (function (jQuery) {
 	}(WebDAV.prototype));
 
 
-	/* Dialog */
+	// ### Dialog
+	// This is creating a new dialog over all other things
 	function Dialog(commenter, title, position) {
 		var instance = this,
 			state;
@@ -135,9 +148,19 @@ var Commenter = (function (jQuery) {
 			this.commenter.dialogOpen = false;
 			this.dialog.remove();
 		};
+		// This function is adding a new color to the colorchooser in the dialog
 		fn.addColor = function (color) {
 			this.comment.append('<label class="comment-add-colorchooser"><input value="' + color + '" type="radio" name="comment-add-color" /><div style="background:' + color + ';"></div></label>');
 		};
+		// With this function you are able to set the values in the dialog's formula
+		// Example:
+		//
+		//      dialog.setValues({
+		//           'name':    'leonard',
+		//           'comment': 'testbla',
+		//           'color':   '#00ff00'
+		//      });
+		//
 		fn.setValues = function (values) {
 			$('#' + this.id + ' .comment-add-name').val(values.name);
 			$('#' + this.id + ' .comment-add-comment').val(values.comment);
@@ -145,7 +168,8 @@ var Commenter = (function (jQuery) {
 		};
 	}(Dialog.prototype));
 
-	/* Commenter */
+	// ### Commenter
+	// Here we come to the serious part of the code: The commenter itself. This object gets returned if you create a new Commenter.
 	function Commenter(layer, jsonSource) {
 		var instance = this;
 		this.layer = $(layer);
@@ -155,7 +179,7 @@ var Commenter = (function (jQuery) {
 
 		this.container = $('<div class="comments-container">');
 
-		// set the container size
+		// Set the container size
 		this.container.css({
 			'width': $.document.width(),
 			'height': $.document.height()
@@ -165,7 +189,7 @@ var Commenter = (function (jQuery) {
 			var posX = e.pageX,
 				posY = e.pageY;
 
-			// create the create-dialog
+			// Create the create-dialog
 			if (instance.editEnabled === false && instance.dialogOpen === false) {
 				this.dialog = new Dialog(instance, 'Create a new comment', [posX, posY]);
 				this.dialog.open();
@@ -173,7 +197,7 @@ var Commenter = (function (jQuery) {
 			}
 		});
 
-		// create the canvases and the comments-layer
+		// Create the canvases and the comments-layer
 		this.staticCanvas = this.createFullScreenCanvas('comments-canvas').
 			attr('id', 'comments-static-canvas').
 			appendTo(this.container).get(0);
@@ -190,7 +214,7 @@ var Commenter = (function (jQuery) {
 		this.oldJson = [];
 		this.loadComments();
 
-		// create the commenter layer and embed it later to prevent browser rendering
+		// Create the commenter layer and embed it later to prevent browser rendering
 		this.layer.append(this.container);
 
 		$('body').append(this.layer);
@@ -206,7 +230,7 @@ var Commenter = (function (jQuery) {
 			this.container.fadeToggle(500);
 		};
 
-		// canvas functions //
+		// #### Canvas functions
 		fn.createFullScreenCanvas = function (classNames) {
 			return $('<canvas>').attr({
 				'class':  classNames,
@@ -214,18 +238,18 @@ var Commenter = (function (jQuery) {
 				'height': $.document.height()
 			});
 		};
-
+		// This function redraws all dynamic lines, it's used by the drag-handlers of each comment.
 		fn.redrawLines = function () {
 			var context = this.dynamicCTX;
 
-			// clear the canvas
+			// Clear the canvas
 			context.clearRect(0, 0, this.dynamicCanvas.width, this.dynamicCanvas.height);
 
-			// redraw all lines
+			// Redraw all lines
 			context.beginPath();
 
 			$.each(this.dynamicLines, function () {
-				// add the line
+				// Add the line
 				context.moveTo(this[0], this[1]);
 				context.lineTo(this[2], this[3]);
 			});
@@ -233,9 +257,9 @@ var Commenter = (function (jQuery) {
 			context.stroke();
 		};
 
-		// color functions //
+		// #### Color functions
+		// [Source](http://jqueryui.com/demos/slider/#colorpicker)
 		function rgbToHex(rgb) {
-			// from http://jqueryui.com/demos/slider/#colorpicker
 			var hex = [
 				rgb[0].toString(16),
 				rgb[1].toString(16),
@@ -249,9 +273,10 @@ var Commenter = (function (jQuery) {
 			return hex.join('').toUpperCase();
 		}
 
+		// [Source](http://www.javascripter.net/faq/hextorgb.htm)
 		function hexToRgb(hex) {
 			var r, g, b;
-			// from http://www.javascripter.net/faq/hextorgb.htm
+
 			function cutHex(h) {
 				return (h.charAt(0) === "#") ? h.substring(1, 7) : h;
 			}
@@ -263,6 +288,7 @@ var Commenter = (function (jQuery) {
 			return [r, g, b];
 		}
 
+		// This function return white or black depending on the input color
 		function textColorByRgb(rgb) {
 			var color;
 			if ((rgb[0] + rgb[1] + rgb[2]) < 300) {
@@ -273,9 +299,11 @@ var Commenter = (function (jQuery) {
 			return color;
 		}
 
-		// the comment load- and add-functions //
+		// #### The comment load- and add-functions
+
+		// Function to create and append a random string to an url to enforce the browser to reload the file
 		function randomURL(url) {
-			// look if there is already a query string
+			// Look if there is already a query string
 			var anchor = document.createElement('a');
 			anchor.href = url;
 
@@ -288,10 +316,11 @@ var Commenter = (function (jQuery) {
 			return anchor.href;
 		}
 
+		// Function to clear the canvases and the comments layer and load all comments from the JSON source
 		fn.loadComments = function () {
 			var url = randomURL(this.jsonSource), instance = this;
 
-			// delete all existing comments
+			// Delete all existing comments
 			this.dynamicCTX.clearRect(0, 0, this.dynamicCanvas.width, this.dynamicCanvas.height);
 			this.staticCTX.clearRect(0, 0, this.staticCanvas.width, this.staticCanvas.height);
 			this.innerLayer.find('.comment').remove();
@@ -315,6 +344,7 @@ var Commenter = (function (jQuery) {
 			});
 		};
 
+		// Function to get a comment by an UNIX-Timestamp
 		fn.getCommentByTime = function (time) {
 			var instance = this, comment, id;
 
@@ -327,18 +357,19 @@ var Commenter = (function (jQuery) {
 			return [id, comment];
 		};
 
+		// This function adds a new comment to the comments layer and creates the origin point and the dynamic line on the canvases
 		fn.addComment = function (author, content, time, color, position) {
 			var instance = this,
 
-				// make the time readable
+				// Make the time readable
 				date = new Date(time * 1000),
 				r_time = date.getHours() + ":" + date.getMinutes() + " " + date.getDate() + "." + date.getMonth() + "." + date.getFullYear(),
 
-				// check for dark colors to set the right font color
+				// Check for dark colors to set the right font color
 				rgb = hexToRgb(color),
 				fontColor = textColorByRgb(rgb),
 
-				// create the comment
+				// Create the comment
 				comment = $('<div class="comment">')
 					.css({
 						'left':			parseInt(position[0], 10) + 15,
@@ -371,7 +402,7 @@ var Commenter = (function (jQuery) {
 							instance.dynamicLines[time] = [old[0], old[1], pos.left, pos.top];
 							instance.redrawLines();
 						},
-						// just a hack to ensure that the line is always drawed till the edge of the comment
+						// Just a hack to ensure that the line is always drawed till the edge of the comment
 						stop:	function () {
 							var old = instance.dynamicLines[time],
 								pos = $(this).position();
@@ -384,7 +415,7 @@ var Commenter = (function (jQuery) {
 						instance.editEnabled = time;
 						var pos = instance.getCommentByTime(time);
 
-						// create the edit-dialog
+						// Create the edit-dialog
 						this.dialog = new Dialog(instance, 'Edit this comment', [pos[1].position[0], pos[1].position[1]]);
 						this.dialog.setValues({
 							'name':		$(this).find('h4').text(),
@@ -396,23 +427,25 @@ var Commenter = (function (jQuery) {
 							instance.dialogOpen = true;
 						}
 					})
-					// dirty hack to revert .draggable()s relative position
+					// Dirty hack to revert .draggable()s relative position
 					.css('position', 'absolute');
 
 			this.innerLayer.append(comment);
 
-			// create the static canvas points
+			// Create the static canvas points
 			if (this.staticCanvas.getContext && this.dynamicCanvas.getContext) {
 				this.staticCTX.beginPath();
 				this.staticCTX.arc(position[0], position[1], 5, 0, Math.PI * 2, true);
 				this.staticCTX.fill();
 
-				// redraw the dynamic lines
+				// Redraw the dynamic lines
 				this.dynamicLines[time] = [position[0], position[1], (parseInt(position[0], 10) + 15), (parseInt(position[1], 10) + 15)];
 				this.redrawLines();
 			}
 		};
 
+		// Function to create a new comment in the JSON source file
+		// Please notice: This function is using the loadComments()-Function so you don't need to call addComment() on creating a new comment
 		fn.setComment = function (author, content, color, position, time) {
 			var instance = this,
 				everythingWentWell = true,
@@ -423,11 +456,12 @@ var Commenter = (function (jQuery) {
 				dav;
 
 			dav = new WebDAV(this.jsonSource);
+			alert(dav.lock());
 			if (dav.lock().substr(0, 2) === '20') {
-				// reload the comments to prevent overwriting
+				// Reload the comments to prevent overwriting
 				this.loadComments();
 
-				// generate the new json
+				// Generate the new JSON
 				if (this.editEnabled !== false) {
 					commentObj = this.getCommentByTime(time);
 				} else {
@@ -450,7 +484,7 @@ var Commenter = (function (jQuery) {
 
 				if (dav.put(JSON.stringify(instance.oldJson))) {
 					if (dav.unlock()) {
-						// reload the comments
+						// Reload the comments
 						window.setTimeout(function () {
 							instance.loadComments();
 						}, 200);
