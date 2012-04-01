@@ -398,6 +398,7 @@ var Commenter = (function (jQuery) {
 								$('<small></small>')
 									.append(r_time)
 							)
+							.attr('title', author)
 					)
 					.append(
 						$('<article></article>')
